@@ -1,6 +1,6 @@
-MIT License
+MIT License - Transcriptonic
 
-Copyright (c) 2025 Hon Pg
+Copyright (c) 2024 Vivek G
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
