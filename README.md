@@ -1,14 +1,14 @@
-# Ocean AI - AI-Powered Meeting Summaries & Reports
+# Blabber - AI-Powered Meeting Summaries & Reports
 
-> Built at HonPG hehe
+> Built at ScrollHacks 2024
 
-Ocean AI is an AI-powered Chrome extension designed to streamline meeting management and documentation. It simplifies the process of capturing, organizing, and sharing meeting data with key stakeholders. Ocean AI ensures that no critical information is missed during meetings, offering seamless solutions for transcription, report generation, and sharing.
+Blabber is an AI-powered Chrome extension designed to streamline meeting management and documentation. It simplifies the process of capturing, organizing, and sharing meeting data with key stakeholders. Blabber ensures that no critical information is missed during meetings, offering seamless solutions for transcription, report generation, and sharing.
 
 ---
  
 ## Key Features
 
-- **Real-Time Transcription**: Ocean AI uses advanced speech-to-text APIs for accurate, real-time transcription, capturing every aspect of your meetings.
+- **Real-Time Transcription**: Blabber uses advanced speech-to-text APIs for accurate, real-time transcription, capturing every aspect of your meetings.
 - **Comprehensive Report Generation**: Create customizable reports in PDF and DOCX formats with options such as:
   - 📊 **Speaker-Based Reports**: Focus on individual speakers and their contributions.
   - ⏱ **Interval-Based Reports**: Review discussions broken down by time intervals.
@@ -16,10 +16,10 @@ Ocean AI is an AI-powered Chrome extension designed to streamline meeting manage
   - 🗒 **General Reports**: A holistic overview of all meeting details.
 - **Email Integration**: Automatically email generated reports to all attendees, ensuring everyone stays informed.
 - **Screenshot Capture**: Capture important moments in meetings using a simple keyboard shortcut. Screenshots are linked to transcripts and can be annotated for better clarity.
-- **Sentiment Analysis**: Using Natural Language Processing (NLP), Ocean AI provides insights into the emotional tone of the conversation, helping teams understand the mood of discussions.
+- **Sentiment Analysis**: Using Natural Language Processing (NLP), Blabber provides insights into the emotional tone of the conversation, helping teams understand the mood of discussions.
 
   <div style="display: flex; align-items: center;">
-    <img src="https://github.com/user-attachments/assets/ee0abb74-9fb7-4855-8030-06d2ba2dcdae" alt="Ocean AI Icon" width="250" />
+    <img src="https://github.com/user-attachments/assets/ee0abb74-9fb7-4855-8030-06d2ba2dcdae" alt="Blabber Icon" width="250" />
   </div>
 
 
@@ -27,7 +27,7 @@ Ocean AI is an AI-powered Chrome extension designed to streamline meeting manage
 
 ## What is the core concept or problem this project aims to solve?
 
-Meetings often result in miscommunication, missed details, and inefficient post-meeting workflows. Here are the key problems that Ocean AI addresses:
+Meetings often result in miscommunication, missed details, and inefficient post-meeting workflows. Here are the key problems that Blabber addresses:
 
 - **Time-consuming manual transcription**: Writing meeting recaps, reports, and transcripts manually is time-intensive and prone to errors.
   
@@ -37,26 +37,26 @@ Meetings often result in miscommunication, missed details, and inefficient post-
 
 - **Difficulty in large meetings**: Generating comprehensive recaps and transcripts for larger meetings, involving many attendees and speakers, can be overwhelming and prone to omissions.
 
-Ocean AI solves these issues by automating transcription, report generation, and providing tools like sentiment analysis and screenshot capture to ensure that no critical information is missed and that meetings are documented efficiently and accurately.
+Blabber solves these issues by automating transcription, report generation, and providing tools like sentiment analysis and screenshot capture to ensure that no critical information is missed and that meetings are documented efficiently and accurately.
 
 ---
 
 ## Demo Video
 
-Check out the demo video to see Ocean AI in action: [Watch Demo Video](https://www.youtube.com/watch?v=S3DEO8QrMMM)
+Check out the demo video to see Blabber in action: [Watch Demo Video](https://www.youtube.com/watch?v=S3DEO8QrMMM)
 
 ---
 
-# Ocean AI Chrome Extension - Local Setup Guide
+# Blabber Chrome Extension - Local Setup Guide
 
 ## Project Directory Structure
 
 - AI-backend/ – Python Flask-based backend for AI-related tasks.
-- Ocean AI-frontend/ – React-based frontend for Ocean AI.
+- blabber-frontend/ – React-based frontend for Blabber.
 - google-meet-chrome-extension/ – Chrome extension for Google Meet integration.
 - node_backend/ – Node.js Express backend.
 - .gitignore – Files to ignore in version control.
-- Ocean AI architecture.png – Architecture diagram for Ocean AI.
+- blabber architecture.png – Architecture diagram for Blabber.
 - README.md – Setup guide and project documentation.
 
 
@@ -145,15 +145,15 @@ This is the Node.js backend that handles API requests and integrates with other 
   The backend server will now be running locally at http://localhost:3000 (or another port if configured).
 
 
-## 3. Ocean AI-frontend (React - Vite)
+## 3. blabber-frontend (React - Vite)
 
-This is the frontend for the Ocean AI application, built using React and Vite for fast development.
+This is the frontend for the Blabber application, built using React and Vite for fast development.
 
 ### Steps to set up the frontend:
 
-1. *Navigate to the Ocean AI-frontend directory*:
+1. *Navigate to the blabber-frontend directory*:
      ```bash
-     cd Ocean AI-frontend
+     cd blabber-frontend
    
 
 2. *Install dependencies*:
@@ -170,7 +170,7 @@ This is the frontend for the Ocean AI application, built using React and Vite fo
 
 ## 4. google-meet-chrome-extension
 
-This directory contains the Chrome extension that integrates Ocean AI with Google Meet.
+This directory contains the Chrome extension that integrates Blabber with Google Meet.
 
 ### Steps to load the extension in Chrome:
 
