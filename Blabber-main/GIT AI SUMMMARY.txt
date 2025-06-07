@@ -1,0 +1,27 @@
+GIT AI SUMMMARY
+
+Cách run 
+
+1. Folder AI-backend
+
+python -m venv venv
+
+pip install -r requirements.txt
+
+pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1
+
+python app.py
+
+2. Folder node-backend
+
+npm install
+
+npm run start
+
+3. Folder node-frontend
+
+npm install
+
+npm run dev
+
+
