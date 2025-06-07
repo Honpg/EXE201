@@ -1,6 +1,6 @@
 # Ocean AI - AI-Powered Meeting Summaries & Reports
 
-> Built at ScrollHacks 2024
+> Built at HonPG hehe
 
 Ocean AI is an AI-powered Chrome extension designed to streamline meeting management and documentation. It simplifies the process of capturing, organizing, and sharing meeting data with key stakeholders. Ocean AI ensures that no critical information is missed during meetings, offering seamless solutions for transcription, report generation, and sharing.
 
