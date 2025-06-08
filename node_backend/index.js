@@ -60,21 +60,33 @@ app.get('/', (req, res) => {
 //   credentials: true
 // }));
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'chrome-extension://pkgiglhninikcahjlpcmcnlcmkijabfi'
-];
+// const allowedOrigins = [
+//   'http://localhost:5173',
+//   'chrome-extension://pkgiglhninikcahjlpcmcnlcmkijabfi'
+// ];
+
+
+// app.use(cors({
+//   origin: function(origin, callback) {
+//     // Cho phép các request không có origin (ví dụ Postman, server-to-server)
+//     if (!origin) return callback(null, true);
+
+//     if (allowedOrigins.indexOf(origin) === -1) {
+//       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+//       return callback(new Error(msg), false);
+//     }
+//     return callback(null, true);
+//   },
+//   credentials: true
+// }));
 
 app.use(cors({
   origin: function(origin, callback) {
-    // Cho phép các request không có origin (ví dụ Postman, server-to-server)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+    // ⚠️ Cho phép extension bất kỳ trong chế độ dev
+    if (!origin || origin.startsWith("chrome-extension://") || origin === "http://localhost:5173") {
+      return callback(null, true);
     }
-    return callback(null, true);
+    return callback(new Error("Not allowed by CORS"), false);
   },
   credentials: true
 }));
