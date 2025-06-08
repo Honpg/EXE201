@@ -1,4 +1,4 @@
-# Blabber - AI-Powered Meeting Summaries & Reports
+# Ocean AI - AI-Powered Meeting Summaries & Reports
 
 > Built at ScrollHacks 2024
 
