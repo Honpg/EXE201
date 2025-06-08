@@ -431,9 +431,20 @@ async function sendToBackend() {
       });
     });
 
-    const speakersArray = Array.from(result.speakers || [])
-      .map(speaker => speaker.trim())
-      .filter(speaker => speaker !== "");
+   // ✅ Thu thập speakers trực tiếp từ transcript
+        const allSpeakerNames = new Set();
+
+        lines.forEach(line => {
+          if (line.type === "transcript") {
+            const name = line.name?.trim();
+            if (name && name !== "") {
+              allSpeakerNames.add(name);
+            }
+          }
+        });
+
+        const speakersArray = Array.from(allSpeakerNames);
+
 
     // Đăng ký user (nếu chưa tồn tại)
     const registerRes = await fetch('http://localhost:3000/api/register-from-extension', {
