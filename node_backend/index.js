@@ -108,7 +108,7 @@ mongoose.connect(MONGO_URI, {
 
   app.post('/api/meet', async (req, res) => {
     try {
-       console.log('Received /api/meet with body:', req.body);
+      console.log('Received /api/meet with body:', req.body);
       const meetData = req.body;
   
       // Check if the user exists based on blabberEmail
@@ -228,13 +228,14 @@ app.get('/api/users/check', checkAuth, async (req, res) => {
 app.get('/api/meet',checkAuth, async (req, res) => {
   try {
     const email = req.user.email;
+    console.log(`Fetching meets for user: ${email}`);
     const user = await User.findOne({ email });
 
     if(!user){
         throw new Error("This email isn't registered!")
     }
     // console.log(user, email)
-    const meets = await Meet.find({ blabberEmail : email}).sort({ meetingStartTimeStamp: -1 });
+    const meets = await Meet.find({ blabberEmail: email}).sort({ meetingStartTimeStamp: -1 });
     if (meets.length === 0) {
       return res.status(404).json({ message: 'No meets found for this email.' });
     }
@@ -272,7 +273,7 @@ app.get("/api/oauth/google", passport.authenticate("google",  { scope: ["profile
 
 // Google OAuth callback URL
 app.get('/api/oauth/google/callback', passport.authenticate('google', { session: false, failureRedirect:`${process.env.CLIENT_URL}/failed`,prompt: 'select_account' }), (req, res) => {
-    console.log("HAHAHAHAH")
+    console.log(`Google authentication successful for user: ${req.user.email}`)
   if (req.user) {
     const user = req.user;
     // console.log("USERRRR: ", user)
