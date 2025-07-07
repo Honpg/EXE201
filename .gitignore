@@ -1,1 +1,43 @@
-AI-backend/__pycache__/report_generator.cpython-310.pyc
+# Python backend
+AI-backend/__pycache__/
+AI-backend/*.py[cod]
+AI-backend/*$py.class
+AI-backend/env/
+AI-backend/.env
+AI-backend/*.log
+AI-backend/reports/
+
+# Node.js backend
+node_backend/node_modules/
+node_backend/.env
+node_backend/coverage/
+node_backend/npm-debug.log
+node_backend/yarn-error.log
+node_backend/.pnpm-debug.log
+node_backend/logs/
+
+# Frontend (React)
+ocean-ai-frontend/node_modules/
+ocean-ai-frontend/dist/
+ocean-ai-frontend/build/
+ocean-ai-frontend/.env
+ocean-ai-frontend/.env.local
+ocean-ai-frontend/.env.development.local
+ocean-ai-frontend/.env.test.local
+ocean-ai-frontend/.env.production.local
+ocean-ai-frontend/npm-debug.log*
+ocean-ai-frontend/yarn-debug.log*
+ocean-ai-frontend/yarn-error.log*
+ocean-ai-frontend/coverage/
+
+# Chrome Extension
+google-meet-chrome-extension/env.js
+google-meet-chrome-extension/.env
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

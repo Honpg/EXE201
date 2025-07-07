@@ -13,7 +13,7 @@ const handleGoogleSignIn = (e) => {
     className="absolute -inset-2 rounded-lg bg-gradient-to-r from-purple-600 to-blue-500 opacity-75 blur"
   ></div>
       <div className="relative p-7 lg:p-10 bg-white shadow-lg rounded-lg p-10 max-w-lg text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-5">Welcome to Blabber</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-5">Welcome to Ocean AI</h1>
         <p className="text-lg text-gray-700 mb-6">Your one-stop solution for smart, real-time meeting transcripts and summaries.</p>
         
         {/* Features */}

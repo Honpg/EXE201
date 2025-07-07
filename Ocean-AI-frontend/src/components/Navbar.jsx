@@ -13,10 +13,10 @@ function Navbar() {
 
   return (
     <nav className="bg-purple-900 p-4 flex justify-between items-center">
-      {/* Left side - Blabber logo */}
+      {/* Left side - Ocean AI logo */}
       <div className="text-white text-2xl font-bold hover:rounded-lg hover:bg-white p-1">
         <Link to="/" className="nav-name">
-          Blabber
+          Ocean AI
         </Link>
       </div>
 

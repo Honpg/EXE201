@@ -18,11 +18,111 @@ from collections import Counter
 from textblob import TextBlob # type: ignore
 from transformers import pipeline # type: ignore
 import torch # type: ignore
+import logging
+import time
+import hashlib
+from functools import lru_cache
 matplotlib.use('Agg')  # Use non-GUI backend
 
+# Cache cho tóm tắt để tránh xử lý lại - tăng kích thước cache
+summary_cache = {}
+content_cache = {}  # Cache cho nội dung đã xử lý
+
+def get_text_hash(text):
+    """Tạo hash cho văn bản để cache"""
+    return hashlib.md5(text.encode('utf-8')).hexdigest()[:16]
+
+def get_content_summary_cached(content_list):
+    """Lấy tóm tắt cho danh sách nội dung với cache thông minh"""
+    # Tạo hash cho toàn bộ content list
+    combined_content = "|".join(content_list)
+    content_hash = get_text_hash(combined_content)
+    
+    if content_hash in content_cache:
+        logger.info(f"Sử dụng cache cho content list (hash: {content_hash})")
+        return content_cache[content_hash]
+    
+    # Nếu không có cache, xử lý bình thường
+    prefixed_text = "Tóm tắt cuộc họp: " + " ".join(content_list)
+    result = summarize_text(prefixed_text, max_length=150, min_length=30)
+    
+    # Lưu vào cache
+    content_cache[content_hash] = result
+    return result
+
+# Thiết lập logging chi tiết - chỉ log ra file để tránh Unicode errors trên Windows
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('report_generator.log', encoding='utf-8'),
+        # Tạm thời tắt console logging để tránh Unicode errors
+        # logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
 # Function to categorize sentiment based on polarity score
-# Load the summarization model
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn",device=torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu"))
+# Load the summarization model - Using Vietnamese models
+try:
+    from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, T5ForConditionalGeneration
+    
+    logger.info("Bắt đầu tải mô hình tóm tắt...")
+    start_time = time.time()
+    
+    # Thử các mô hình tiếng Việt theo thứ tự ưu tiên (từ nhẹ đến nặng)
+    models_to_try = [
+        "google/mt5-small",  # Nhẹ nhất, nhanh nhất
+        "VietAI/vit5-base",
+        "VietAI/vit5-large-vietnews-summarization"  # Chỉ dùng khi cần chất lượng cao
+    ]
+    
+    model_loaded = False
+    for model_name in models_to_try:
+        try:
+            logger.info(f"Đang thử tải mô hình: {model_name}")
+            tokenizer = AutoTokenizer.from_pretrained(model_name)
+            
+            # Cấu hình đặc biệt cho từng mô hình
+            if "vit5" in model_name.lower():
+                model = T5ForConditionalGeneration.from_pretrained(model_name)
+            else:
+                model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+            
+            # Tạo pipeline với cấu hình tối ưu cho tiếng Việt
+            summarizer = pipeline(
+                "summarization", 
+                model=model, 
+                tokenizer=tokenizer,
+                device=torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu"),
+                clean_up_tokenization_spaces=True,
+                # Cấu hình cho tiếng Việt - loại bỏ các tham số không cần thiết
+                truncation=True
+            )
+            
+            load_time = time.time() - start_time
+            logger.info(f"Tải mô hình thành công: {model_name} - Thời gian: {load_time:.2f}s")
+            model_loaded = True
+            break
+            
+        except Exception as model_error:
+            logger.error(f"Lỗi tải mô hình {model_name}: {model_error}")
+            continue
+    
+    if not model_loaded:
+        raise Exception("All Vietnamese models failed to load")
+        
+except Exception as e:
+    print(f"Error loading Vietnamese models: {e}")
+    print("Falling back to mT5-base as last resort...")
+    # Last resort fallback
+    try:
+        summarizer = pipeline("summarization", 
+                            model="google/mt5-base", 
+                            device=torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu"),
+                            clean_up_tokenization_spaces=True)
+    except:
+        raise Exception("All models failed to load. Please check your internet connection and model availability.")
 
 # Function to categorize sentiment based on polarity score
 def categorize_sentiment(polarity):
@@ -210,29 +310,158 @@ def chunk_text(text, max_tokens=500):
         yield " ".join(words[i:i+max_tokens])
 
 def summarize_text(text, max_length=150, min_length=30):
+    """
+    Tóm tắt văn bản với logging chi tiết và tối ưu hóa tốc độ
+    """
+    start_time = time.time()
+    logger.info(f"Bắt đầu tóm tắt văn bản - Độ dài: {len(text)} ký tự")
+    
     if len(text.strip()) == 0:
+        logger.warning("Văn bản trống, trả về chuỗi rỗng")
         return ""
     
-    # Tối đa token model hỗ trợ (đặt nhỏ hơn giới hạn thực tế để an toàn)
-    max_chunk_tokens = 500
-
-    # Nếu đoạn text ngắn, summarize trực tiếp
-    if len(text.split()) <= max_chunk_tokens:
-        summary = summarizer(text, max_length=max_length, min_length=min_length, do_sample=False)
-        return summary[0]['summary_text']
+    # Kiểm tra cache trước
+    text_hash = get_text_hash(text + str(max_length) + str(min_length))
+    if text_hash in summary_cache:
+        logger.info(f"Sử dụng cache cho văn bản (hash: {text_hash})")
+        return summary_cache[text_hash]
     
-    # Nếu đoạn text dài, chia nhỏ thành nhiều chunk
-    chunk_summaries = []
-    for chunk in chunk_text(text, max_chunk_tokens):
-        summary = summarizer(chunk, max_length=max_length, min_length=min_length, do_sample=False)
-        chunk_summaries.append(summary[0]['summary_text'])
+    # Làm sạch text trước khi tóm tắt - tối ưu cho tiếng Việt
+    text = text.strip()
+    text = ' '.join(text.split())  # Normalize whitespace
     
-    # Ghép các summary lại thành một đoạn text
-    combined_summary = " ".join(chunk_summaries)
+    # Loại bỏ các ký tự đặc biệt không cần thiết
+    text = re.sub(r'[^\w\s\.,!?;:\-\(\)]', ' ', text, flags=re.UNICODE)
+    text = re.sub(r'\s+', ' ', text)  # Collapse multiple spaces
+    
+    # Tính toán độ dài đầu vào
+    input_length = len(text.split())
+    logger.info(f"Độ dài văn bản sau khi xử lý: {input_length} từ")
+    
+    # Điều chỉnh tham số dựa trên độ dài đầu vào - tối ưu cho tiếng Việt
+    if input_length < min_length:
+        logger.info("Văn bản quá ngắn, trả về văn bản gốc")
+        result = text
+        summary_cache[text_hash] = result
+        return result
+    
+    # Giới hạn độ dài tối đa để tránh xử lý quá lâu
+    if input_length > 800:  # Giảm từ 1000 xuống 800
+        logger.warning(f"Văn bản quá dài ({input_length} từ), cắt ngắn xuống 800 từ")
+        text = " ".join(text.split()[:800])
+        input_length = 800
+    
+    # Tỷ lệ tóm tắt thấp hơn cho tiếng Việt (60% thay vì 70%)
+    adjusted_max_length = min(max_length, max(int(input_length * 0.6), min_length))
+    adjusted_min_length = min(min_length, max(int(input_length * 0.2), 5))
+    
+    # Tối đa token model hỗ trợ - điều chỉnh cho T5/mT5
+    max_chunk_tokens = 150  # Giảm thêm từ 200 xuống 150 để tăng tốc
 
-    # Tóm tắt lại lần 2 với đoạn summary đã ghép
-    final_summary = summarizer(combined_summary, max_length=max_length, min_length=min_length, do_sample=False)
-    return final_summary[0]['summary_text']
+    try:
+        # Nếu đoạn text ngắn, summarize trực tiếp
+        if input_length <= max_chunk_tokens:
+            logger.info("Tóm tắt trực tiếp văn bản ngắn")
+            summary_start = time.time()
+            summary = summarizer(
+                text, 
+                max_length=adjusted_max_length, 
+                min_length=adjusted_min_length, 
+                do_sample=False,
+                clean_up_tokenization_spaces=True,
+                # Tham số tối ưu cho tiếng Việt - sửa lỗi early_stopping
+                num_beams=1,  # Giảm từ 2 xuống 1 để tăng tốc tối đa
+                early_stopping=True,
+                no_repeat_ngram_size=2  # Giảm từ 3 xuống 2
+            )
+            summary_time = time.time() - summary_start
+            logger.info(f"Tóm tắt hoàn thành trong {summary_time:.2f}s")
+            total_time = time.time() - start_time
+            logger.info(f"Tổng thời gian tóm tắt: {total_time:.2f}s")
+            result = summary[0]['summary_text']
+            summary_cache[text_hash] = result
+            return result
+        
+        # Nếu đoạn text dài, chia nhỏ thành nhiều chunk
+        logger.info(f"Văn bản dài, chia thành chunks với {max_chunk_tokens} token mỗi chunk")
+        chunk_summaries = []
+        chunks = list(chunk_text(text, max_chunk_tokens))
+        logger.info(f"Chia thành {len(chunks)} chunks")
+        
+        # Giới hạn số chunks để tránh quá chậm
+        if len(chunks) > 3:  # Giảm từ 5 xuống 3 để tăng tốc
+            logger.warning(f"Quá nhiều chunks ({len(chunks)}), chỉ xử lý 3 chunks đầu")
+            chunks = chunks[:3]
+        
+        for i, chunk in enumerate(chunks):
+            chunk_start = time.time()
+            logger.info(f"Xử lý chunk {i+1}/{len(chunks)}")
+            
+            chunk_length = len(chunk.split())
+            chunk_max_length = min(adjusted_max_length, max(int(chunk_length * 0.6), adjusted_min_length))
+            
+            summary = summarizer(
+                chunk, 
+                max_length=chunk_max_length, 
+                min_length=adjusted_min_length, 
+                do_sample=False,
+                clean_up_tokenization_spaces=True,
+                num_beams=1,  # Giảm từ 2 xuống 1 để tăng tốc tối đa
+                early_stopping=True,
+                no_repeat_ngram_size=2  # Giảm từ 3 xuống 2
+            )
+            chunk_summaries.append(summary[0]['summary_text'])
+            
+            chunk_time = time.time() - chunk_start
+            logger.info(f"Chunk {i+1} hoàn thành trong {chunk_time:.2f}s")
+        
+        # Ghép các summary lại thành một đoạn text
+        combined_summary = " ".join(chunk_summaries)
+        logger.info(f"Ghép {len(chunk_summaries)} summaries thành summary cuối cùng")
+
+        # Chỉ tóm tắt lần 2 nếu kết quả vẫn quá dài
+        final_input_length = len(combined_summary.split())
+        if final_input_length > adjusted_max_length * 1.5:  # Chỉ tóm tắt nếu quá dài 1.5 lần
+            logger.info("Tóm tắt lần 2 để rút gọn kết quả")
+            final_summary_start = time.time()
+            final_max_length = min(adjusted_max_length, max(int(final_input_length * 0.7), adjusted_min_length))
+            final_summary = summarizer(
+                combined_summary, 
+                max_length=final_max_length, 
+                min_length=adjusted_min_length, 
+                do_sample=False,
+                clean_up_tokenization_spaces=True,
+                num_beams=1,  # Giảm từ 2 xuống 1 để tăng tốc tối đa
+                early_stopping=True,
+                no_repeat_ngram_size=2  # Giảm từ 3 xuống 2
+            )
+            final_summary_time = time.time() - final_summary_start
+            logger.info(f"Tóm tắt lần 2 hoàn thành trong {final_summary_time:.2f}s")
+            
+            total_time = time.time() - start_time
+            logger.info(f"Tổng thời gian tóm tắt: {total_time:.2f}s")
+            result = final_summary[0]['summary_text']
+            summary_cache[text_hash] = result
+            return result
+        else:
+            total_time = time.time() - start_time
+            logger.info(f"Tổng thời gian tóm tắt: {total_time:.2f}s")
+            summary_cache[text_hash] = combined_summary
+            return combined_summary
+            
+    except Exception as e:
+        total_time = time.time() - start_time
+        logger.error(f"Lỗi tóm tắt sau {total_time:.2f}s: {str(e)}")
+        
+        # Fallback: trả về một phần đầu của text nếu tóm tắt thất bại
+        words = text.split()
+        if len(words) > adjusted_max_length:
+            fallback_text = ' '.join(words[:adjusted_max_length]) + "..."
+            logger.info(f"Sử dụng fallback text với {len(fallback_text)} ký tự")
+            summary_cache[text_hash] = fallback_text
+            return fallback_text
+        summary_cache[text_hash] = text
+        return text
 
 
 def summarize_takeaways(takeaways):
@@ -246,8 +475,11 @@ def is_meaningful(content):
     return len(content.split()) >= 3 and '?' not in content
 
 def generate_summary_and_takeaways(analysis_results):
-    """Generate overall summary and key takeaways based on analysis."""
-    overall_summary = "Summary of the meeting:"
+    """Generate overall summary and key takeaways based on analysis - optimized for Vietnamese."""
+    start_time = time.time()
+    logger.info(f"Bắt đầu generate_summary_and_takeaways với {len(analysis_results)} kết quả phân tích")
+    
+    overall_summary = "Tóm tắt cuộc họp:"
     key_takeaways = []
 
     if analysis_results:
@@ -256,44 +488,91 @@ def generate_summary_and_takeaways(analysis_results):
             sentiment = entry['sentiment_category']
             content = entry['content']
             
-            # Improved phrasing for clarity
-            takeaway = f"{speaker} expressed a {sentiment.lower()} sentiment, stating: '{content}'"
+            # Cải thiện cách diễn đạt cho tiếng Việt
+            sentiment_vn = {
+                'positive': 'tích cực',
+                'negative': 'tiêu cực', 
+                'neutral': 'trung lập'
+            }.get(sentiment.lower(), sentiment)
+            
+            takeaway = f"{speaker} bày tỏ thái độ {sentiment_vn} và nói: '{content}'"
             key_takeaways.append(takeaway)
 
     # Summarize key takeaways using the summarization model
-    summarized_takeaways = summarize_takeaways(key_takeaways)
+    if key_takeaways:
+        logger.info(f"Tóm tắt {len(key_takeaways)} takeaways")
+        summarized_takeaways = summarize_takeaways(key_takeaways)
+    else:
+        logger.warning("Không có takeaways nào để tóm tắt")
+        summarized_takeaways = "Không có điểm chính nào được ghi nhận trong cuộc họp này."
     
+    total_time = time.time() - start_time
+    logger.info(f"generate_summary_and_takeaways hoàn thành trong {total_time:.2f}s")
     return overall_summary, summarized_takeaways
 
 # Function to generate the overall summary of the meeting
 def generate_overall_summary(transcript_data):
+    start_time = time.time()
+    logger.info(f"Bắt đầu generate_overall_summary với {len(transcript_data)} transcript entries")
+    
     content_list = [entry['content'].strip() for entry in transcript_data if is_meaningful(entry['content'])]
-    summary_text = " ".join(content_list)  # Combine content for better context
+    
+    if not content_list:
+        logger.warning("Không có nội dung có ý nghĩa")
+        return "Không có nội dung có ý nghĩa nào được tìm thấy trong cuộc họp."
 
-    # Summarize the overall content
-    summarized_summary = summarize_text(summary_text, max_length=150, min_length=30)
-    return f"In summary, the meeting covered the following key points: {summarized_summary}"
+    logger.info(f"Tìm thấy {len(content_list)} nội dung có ý nghĩa")
+    
+    # Sử dụng cache thông minh cho content
+    summarized_summary = get_content_summary_cached(content_list)
+    
+    # Làm sạch kết quả nếu còn prefix
+    if summarized_summary.startswith("Tóm tắt cuộc họp:"):
+        summarized_summary = summarized_summary.replace("Tóm tắt cuộc họp:", "").strip()
+    
+    result = f"Tóm tắt: {summarized_summary}"
+    total_time = time.time() - start_time
+    logger.info(f"generate_overall_summary hoàn thành trong {total_time:.2f}s")
+    return result
 
-# Improved function to generate key takeaways
 def generate_key_takeaways(transcript_data):
     takeaways = []
 
     for entry in transcript_data:
         content = entry['content'].strip()
         if is_meaningful(content):
-            takeaways.append(f"{entry['name']} mentioned: {content}")
-
+            takeaways.append(f"{entry['name']} đã đề cập: {content}")
 
     if not takeaways:
-        takeaways.append("There were no specific key takeaways from the meeting.")
+        return "Không có điểm chính nào được ghi nhận trong cuộc họp này."
 
-    # Combine and summarize key takeaways for better context
-    combined_takeaways = " ".join(takeaways)
-    summarized_takeaways = summarize_text(combined_takeaways, max_length=150, min_length=30)
+    # Sử dụng cache cho điểm chính  
+    takeaway_hash = get_text_hash("|".join(takeaways))
+    cache_key = f"takeaway_{takeaway_hash}"
     
-    return summarized_takeaways
+    if cache_key in summary_cache:
+        logger.info(f"Sử dụng cache cho key takeaways")
+        return summary_cache[cache_key]
+    
+    # Kết hợp và tóm tắt các điểm chính với ngữ cảnh tốt hơn cho tiếng Việt
+    combined_takeaways = " ".join(takeaways)
+    
+    # Thêm prefix để hướng dẫn mô hình
+    prefixed_text = f"Tóm tắt các điểm chính sau: {combined_takeaways}"
+    
+    summarized_takeaways = summarize_text(prefixed_text, max_length=150, min_length=30)
+    
+    # Làm sạch kết quả nếu còn prefix
+    if summarized_takeaways.startswith("Tóm tắt các điểm chính sau:"):
+        summarized_takeaways = summarized_takeaways.replace("Tóm tắt các điểm chính sau:", "").strip()
+    
+    result = f"Các điểm chính: {summarized_takeaways}"
+    
+    # Lưu vào cache
+    summary_cache[cache_key] = result
+    return result
 
-# Function to generate speaker summaries
+# Function to generate speaker summaries - tối ưu cho tiếng Việt
 def generate_speaker_summaries(transcript_data, speaker_durations):
     speaker_summaries = {}
 
@@ -309,11 +588,20 @@ def generate_speaker_summaries(transcript_data, speaker_durations):
                 }
             speaker_summaries[speaker]['points'].append(content)
 
-    # Summarize each speaker's contributions
+    # Tóm tắt đóng góp của từng người nói
     for speaker, data in speaker_summaries.items():
         combined_points = " ".join(data['points'])
-        summarized_points = summarize_text(combined_points, max_length=150, min_length=30)
-        speaker_summaries[speaker]['summary'] = f"{speaker} contributed: {summarized_points}"
+        
+        # Thêm prefix để hướng dẫn mô hình
+        prefixed_text = f"Tóm tắt những gì {speaker} đã nói: {combined_points}"
+        
+        summarized_points = summarize_text(prefixed_text, max_length=150, min_length=30)
+        
+        # Làm sạch kết quả nếu còn prefix
+        if summarized_points.startswith(f"Tóm tắt những gì {speaker} đã nói:"):
+            summarized_points = summarized_points.replace(f"Tóm tắt những gì {speaker} đã nói:", "").strip()
+        
+        speaker_summaries[speaker]['summary'] = f"{speaker} đã đóng góp: {summarized_points}"
 
     return speaker_summaries
 
@@ -693,35 +981,59 @@ def generate_reports(meeting_data,report_choice=NormalReport,format_choice=PDF_T
         report_choice: the type of report to generate. Use the classes from this file: NormalReport, SpeakerRankingReport, SentimentReport, IntervalReport
         format_choice: the format of the report. Use the classes from this file: PDF, DOCX'''
     
+    start_time = time.time()
+    logger.info(f"Bắt đầu generate_reports - Loại: {report_choice.__name__}, Format: {format_choice.__name__}")
+    
+    # Kiểm tra dữ liệu đầu vào
+    if not meeting_data or 'transcriptData' not in meeting_data:
+        logger.error("Dữ liệu meeting không hợp lệ hoặc thiếu transcriptData")
+        raise ValueError("Invalid meeting data")
+    
+    transcript_length = len(meeting_data.get('transcriptData', []))
+    logger.info(f"Số lượng transcript entries: {transcript_length}")
+    
     # Create reports directory if it does not exist
     create_reports_directory()
 
-
-    if report_choice ==  NormalReport:
-        if format_choice ==  PDF_Type:
-            return create_normal_report_pdf(meeting_data)
-        elif format_choice ==  DOCX_Type:
-            return create_normal_report_docx(meeting_data)
-    elif report_choice ==  SpeakerRankingReport:
-        print("generating speaker ranking report")
-        if format_choice ==  PDF_Type:
-            return create_speaker_ranking_report_pdf(meeting_data)
-        elif format_choice ==  DOCX_Type:
-            return create_speaker_ranking_report_docx(meeting_data)
-    elif report_choice ==  SentimentReport:
-        if format_choice ==  PDF_Type:
-            return create_sentiment_report_pdf(meeting_data)
-        elif format_choice ==  DOCX_Type:
-            return create_sentiment_report_docx(meeting_data)
-    elif report_choice ==  IntervalReport:
-        if not interval_minutes:
-            raise ValueError("Interval minutes must be provided for Interval Report.")
-        if format_choice ==  PDF_Type:
-            return create_report_with_interval_sections_pdf(meeting_data, interval_minutes)
-        elif format_choice ==  DOCX_Type:
-            return create_report_with_interval_sections_docx(meeting_data, interval_minutes)
-    else:
-        raise ValueError("Invalid report or format choice.")
+    try:
+        if report_choice == NormalReport:
+            if format_choice == PDF_Type:
+                logger.info("Tạo Normal Report PDF")
+                result = create_normal_report_pdf(meeting_data)
+            elif format_choice == DOCX_Type:
+                logger.info("Tạo Normal Report DOCX")
+                result = create_normal_report_docx(meeting_data)
+        elif report_choice == SpeakerRankingReport:
+            logger.info("Tạo Speaker Ranking Report")
+            if format_choice == PDF_Type:
+                result = create_speaker_ranking_report_pdf(meeting_data)
+            elif format_choice == DOCX_Type:
+                result = create_speaker_ranking_report_docx(meeting_data)
+        elif report_choice == SentimentReport:
+            logger.info("Tạo Sentiment Report")
+            if format_choice == PDF_Type:
+                result = create_sentiment_report_pdf(meeting_data)
+            elif format_choice == DOCX_Type:
+                result = create_sentiment_report_docx(meeting_data)
+        elif report_choice == IntervalReport:
+            logger.info("Tạo Interval Report")
+            if not interval_minutes:
+                raise ValueError("Interval minutes must be provided for Interval Report.")
+            if format_choice == PDF_Type:
+                result = create_report_with_interval_sections_pdf(meeting_data, interval_minutes)
+            elif format_choice == DOCX_Type:
+                result = create_report_with_interval_sections_docx(meeting_data, interval_minutes)
+        else:
+            raise ValueError("Invalid report or format choice.")
+        
+        total_time = time.time() - start_time
+        logger.info(f"Generate reports hoàn thành trong {total_time:.2f}s")
+        return result
+        
+    except Exception as e:
+        total_time = time.time() - start_time
+        logger.error(f"Lỗi generate_reports sau {total_time:.2f}s: {str(e)}")
+        raise
 
 # Example usage
 if __name__ == "__main__":

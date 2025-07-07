@@ -10,9 +10,9 @@ const timeFormat = {
 }
 const extensionStatusJSON_bug = {
   "status": 400,
-  "message": "<strong>Blabber encountered a new error</strong> <br /> Please report it <a href='https://github.com/sikehish/blabber/issues' target='_blank'>here</a>."
+  "message": "<strong>Ocean AI encountered a new error</strong> <br /> Please report it <a href='https://github.com/sikehish/ocean-ai/issues' target='_blank'>here</a>."
 }
-const reportErrorMessage = "There is a bug in Blabber. Please report it at https://github.com/sikehish/blabber/issues"
+const reportErrorMessage = "There is a bug in Ocean AI. Please report it at https://github.com/sikehish/ocean-ai/issues"
 const mutationConfig = { childList: true, attributes: true, subtree: true }
 
 // Name of the person attending the meeting
@@ -89,7 +89,7 @@ checkExtensionStatus().then(() => {
 async function checkExtensionStatus() {
   // Set default value as 200
   chrome.storage.local.set({
-    extensionStatusJSON: { status: 200, message: "<strong>Blabber is running</strong> <br /> Do not turn off captions" },
+    extensionStatusJSON: { status: 200, message: "<strong>Ocean AI is running</strong> <br /> Do not turn off captions" },
   });
 
   // https://stackoverflow.com/a/42518434
@@ -100,7 +100,7 @@ async function checkExtensionStatus() {
     .then((response) => response.json())
     .then((result) => {
       // Write status to chrome local storage
-      result.message = "<strong>Blabber is running</strong> <br /> Do not turn off captions";
+      result.message = "<strong>Ocean AI is running</strong> <br /> Do not turn off captions";
       chrome.storage.local.set({ extensionStatusJSON: result }, function () {
         console.log("Extension status fetched and saved")
       });
@@ -205,7 +205,7 @@ async function checkExtensionStatus() {
 //       // Show confirmation message from extensionStatusJSON, once observation has started, based on operation mode
 //       chrome.storage.sync.get(["operationMode"], function (result) {
 //         if (result.operationMode == "manual")
-//           showNotification({ status: 400, message: "<strong>Blabber is not running</strong> <br /> Turn on captions using the CC icon, if needed" })
+//           showNotification({ status: 400, message: "<strong>Ocean AI is not running</strong> <br /> Turn on captions using the CC icon, if needed" })
 //         else
 //           showNotification(extensionStatusJSON)
 //       })
@@ -303,7 +303,7 @@ function meetingRoutines(uiType) {
 
       chrome.storage.sync.get(["operationMode"], function (result) {
         if (result.operationMode === "manual") {
-          showNotification({ status: 400, message: "<strong>Blabber is not running</strong><br/>Turn on captions manually." })
+          showNotification({ status: 400, message: "<strong>Ocean AI is not running</strong><br/>Turn on captions manually." })
         } else {
           showNotification(extensionStatusJSON)
         }
@@ -432,9 +432,9 @@ function showNotification(extensionStatusJSON) {
     logo.setAttribute("src", "https://i.imgur.com/pgOwCjJ.png");
     logo.style.cssText = logoImgCSS;
   
-    // Blabber text next to the logo
+    // Ocean AI text next to the logo
     logoText.style.cssText = logoTextCSS;
-    logoText.innerHTML = "Blabber";
+    logoText.innerHTML = "Ocean AI";
     
     // Message text styling
     text.style.cssText = messageCSS;
@@ -518,7 +518,7 @@ function showNotification(extensionStatusJSON) {
 //             transcriptTextBuffer = currentTranscriptText
 //             // Update buffers for next mutation
 //             beforeTranscriptText = currentTranscriptText
-//             // If a person is speaking for a long time, Google Meet does not keep the entire text in the spans. Starting parts are automatically removed in an unpredictable way as the length increases and Blabber will miss them. So we force remove a lengthy transcript node in a controlled way. Google Meet will add a fresh person node when we remove it and continue transcription. Blabber picks it up as a new person and nothing is missed.
+//             // If a person is speaking for a long time, Google Meet does not keep the entire text in the spans. Starting parts are automatically removed in an unpredictable way as the length increases and Ocean AI will miss them. So we force remove a lengthy transcript node in a controlled way. Google Meet will add a fresh person node when we remove it and continue transcription. Ocean AI picks it up as a new person and nothing is missed.
 //             if (currentTranscriptText.length > 250)
 //               person.remove()
 //           }
