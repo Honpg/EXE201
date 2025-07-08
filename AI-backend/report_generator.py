@@ -20,9 +20,34 @@ from transformers import pipeline # type: ignore
 import torch # type: ignore
 matplotlib.use('Agg')  # Use non-GUI backend
 
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase.pdfmetrics import registerFontFamily
+
+# Đăng ký các font Roboto từ thư mục ./fonts
+pdfmetrics.registerFont(TTFont('Roboto', './fonts/Roboto-Regular.ttf'))
+pdfmetrics.registerFont(TTFont('Roboto-Bold', './fonts/Roboto-Bold.ttf'))
+pdfmetrics.registerFont(TTFont('Roboto-Italic', './fonts/Roboto-Italic.ttf'))
+pdfmetrics.registerFont(TTFont('Roboto-BoldItalic', './fonts/Roboto-BoldItalic.ttf'))
+
+# Khai báo family cho Roboto
+registerFontFamily('Roboto',
+                normal='Roboto',
+                bold='Roboto-Bold',
+                italic='Roboto-Italic',
+                boldItalic='Roboto-BoldItalic')
+
+
+
 # Function to categorize sentiment based on polarity score
 # Load the summarization model
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn",device=torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu"))
+# summarizer = pipeline("summarization", model="facebook/bart-large-cnn",device=torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu"))
+
+summarizer = pipeline("summarization", model="csebuetnlp/mT5_multilingual_XLSum")
+    
+
+
+
 
 # Function to categorize sentiment based on polarity score
 def categorize_sentiment(polarity):
@@ -70,8 +95,19 @@ def create_report_with_interval_sections_pdf(meeting_data, interval_minutes):
     pdf = SimpleDocTemplate(file_name, pagesize=A4)
     elements = []
     
+    # styles = getSampleStyleSheet()
+    # title = f"<b>Meeting Report: {meeting_data['meetingTitle']}</b>"
+
+
+
     styles = getSampleStyleSheet()
-    title = f"<b>Meeting Report: {meeting_data['meetingTitle']}</b>"
+    styles = getSampleStyleSheet()
+    for style_name in ['Normal', 'Title', 'Heading2', 'Heading3']:
+        styles[style_name].fontName = 'Roboto'
+
+    
+    title = f"<b>Meeting Report: {meeting_data['meetingTitle']}</b>" 
+
     elements.append(Paragraph(title, styles['Title']))
     elements.append(Spacer(1, 12))
 
@@ -331,7 +367,13 @@ def create_normal_report_pdf(meeting_data):
     elements = []
 
     styles = getSampleStyleSheet()
-    title = f"<b>{meeting_data['meetingTitle']}</b>"
+    for style_name in ['Normal', 'Title', 'Heading2', 'Heading3']:
+        styles[style_name].fontName = 'Roboto'
+
+
+    title = f"<b>Meeting Report: {meeting_data['meetingTitle']}</b>" 
+
+    #title = f"<b>{meeting_data['meetingTitle']}</b>"
     elements.append(Paragraph(title, styles['Title']))
     elements.append(Spacer(1, 12))
 
@@ -368,18 +410,39 @@ def create_normal_report_pdf(meeting_data):
         elements.append(Spacer(1, 12))
 
     # Add screenshots section
+    # if 'screenshots' in meeting_data and meeting_data['screenshots']:
+    #     elements.append(Paragraph("<b>Screenshots:</b>", styles['Heading2']))
+    #     for screenshot in meeting_data['screenshots']:
+    #         elements.append(Paragraph(f"Screenshot taken by {screenshot['takenBy']} at {format_time(screenshot['timestamp'])}", styles['Normal']))
+    #         try:
+    #             image_path = screenshot['takenBy'] + '/' + screenshot['filename']
+    #             img = Image('../node_backend/screenshots/'+ image_path, width=4*inch, height=3*inch)  # Adjust the size as needed
+    #             elements.append(img)
+    #             elements.append(Spacer(1, 12))
+    #         except Exception as e:
+    #             elements.append(Paragraph(f"Could not load image: {image_path}. Error: {str(e)}", styles['Normal']))
+    #             elements.append(Spacer(1, 12))
+
     if 'screenshots' in meeting_data and meeting_data['screenshots']:
         elements.append(Paragraph("<b>Screenshots:</b>", styles['Heading2']))
         for screenshot in meeting_data['screenshots']:
-            elements.append(Paragraph(f"Screenshot taken by {screenshot['takenBy']} at {format_time(screenshot['timestamp'])}", styles['Normal']))
-            try:
-                image_path = screenshot['takenBy'] + '/' + screenshot['filename']
-                img = Image('../node_backend/screenshots/'+ image_path, width=4*inch, height=3*inch)  # Adjust the size as needed
-                elements.append(img)
-                elements.append(Spacer(1, 12))
-            except Exception as e:
-                elements.append(Paragraph(f"Could not load image: {image_path}. Error: {str(e)}", styles['Normal']))
-                elements.append(Spacer(1, 12))
+            elements.append(Paragraph(
+                f"Screenshot taken by {screenshot['takenBy']} at {format_time(screenshot['timestamp'])}",
+                styles['Normal']
+            ))
+
+            image_path = os.path.join('../node_backend/screenshots', screenshot['takenBy'], screenshot['filename'])
+
+            if os.path.exists(image_path):
+                try:
+                    img = Image(image_path, width=4*inch, height=3*inch)
+                    elements.append(img)
+                except Exception as e:
+                    elements.append(Paragraph(f"⚠ Error loading image: {e}", styles['Normal']))
+            else:
+                elements.append(Paragraph(f"⚠ Image not found at path: {image_path}", styles['Normal']))
+
+            elements.append(Spacer(1, 12))
 
     # Finalize and build the PDF
     pdf.build(elements)
@@ -449,7 +512,16 @@ def create_speaker_ranking_report_pdf(meeting_data):
     pdf = SimpleDocTemplate(file_name, pagesize=A4)
     elements = []
     
+    #styles = getSampleStyleSheet()
+
+    
+
     styles = getSampleStyleSheet()
+    styles = getSampleStyleSheet()
+    for style_name in ['Normal', 'Title', 'Heading2', 'Heading3']:
+        styles[style_name].fontName = 'Roboto'
+
+    
     title = f"<b>Speaker Ranking Report: {meeting_data['meetingTitle']}</b>"
     elements.append(Paragraph(title, styles['Title']))
     elements.append(Spacer(1, 12))
@@ -458,18 +530,29 @@ def create_speaker_ranking_report_pdf(meeting_data):
     speaker_data = {}
 
     # Process transcript data to gather speaker information
+    # for entry in meeting_data['transcriptData']:
+    #     speaker_name = entry['name']
+    #     content = entry['content']
+
+    #     if speaker not in speaker_data:
+    #         speaker_data[speaker] = {'count': 0, 'summary': []}
+    #     speaker_data[speaker]['count'] += 1
+    #     speaker_data[speaker]['summary'].append(content)
+        
+    #     speaker_data[speaker_name]['count'] += 1
+    #     speaker_data[speaker_name]['summary'].append(content) 
+    #  # Collect each speech content
+
     for entry in meeting_data['transcriptData']:
         speaker_name = entry['name']
         content = entry['content']
 
         if speaker_name not in speaker_data:
-            speaker_data[speaker_name] = {
-                'count': 0,
-                'summary': []  # List to hold the speaker's speech content
-            }
-        
+            speaker_data[speaker_name] = {'count': 0, 'summary': []}
+            
         speaker_data[speaker_name]['count'] += 1
-        speaker_data[speaker_name]['summary'].append(content)  # Collect each speech content
+        speaker_data[speaker_name]['summary'].append(content)
+
 
     # Sort speakers by their count (descending)
     sorted_speakers = sorted(speaker_data.items(), key=lambda item: item[1]['count'], reverse=True)
@@ -486,7 +569,7 @@ def create_speaker_ranking_report_pdf(meeting_data):
         # Add summarized contributions for each speaker
         elements.append(Paragraph("<b>Summary of Contributions:</b>", styles['Heading3']))
         elements.append(Paragraph(summarized_contributions, styles['Normal']))
-        elements.append(Spacer(1, 6))  # Space between summaries
+        elements.append(Spacer(1, 12))  # Space between summaries
 
     # Build the final PDF
     pdf.build(elements)
@@ -600,7 +683,16 @@ def create_sentiment_report_pdf(meeting_data):
     pdf = SimpleDocTemplate(file_name, pagesize=A4)
     elements = []
     
+    #styles = getSampleStyleSheet()
+
+# đường dẫn tuỳ bạn
+
     styles = getSampleStyleSheet()
+    for style_name in ['Normal', 'Title', 'Heading2', 'Heading3']:
+        styles[style_name].fontName = 'Roboto'
+
+
+    title = f"<b>Meeting Report: {meeting_data['meetingTitle']}</b>" 
     title = "Sentiment Analysis Report"
     elements.append(Paragraph(title, styles['Title']))
     elements.append(Spacer(1, 12))
@@ -766,7 +858,13 @@ if __name__ == "__main__":
             {'name': 'Prateek', 'content': 'Thank you.', 'timeStamp': '2024-09-29T12:26:04.000Z'},
             {'name': 'TitaNyte Official', 'content': 'Yeah, thank you have', 'timeStamp': '2024-09-29T12:26:05.000Z'},
             {'name': 'Prateek', 'content': 'Yeah.', 'timeStamp': '2024-09-29T12:26:06.000Z'},
-            {'name': 'TitaNyte Official', 'content': 'Thank you have a nice day.', 'timeStamp': '2024-09-29T12:26:06.000Z'}
+            {'name': 'TitaNyte Official', 'content': 'Thank you have a nice day.', 'timeStamp': '2024-09-29T12:26:06.000Z'},
+            {
+                'name': 'Hải Trân',
+                'content': 'Cảm ơn các bạn đã chia sẻ thông tin chi tiết. Bây giờ chúng ta sẽ dành vài phút để tổng kết lại nội dung đã trao đổi và xác định các đầu việc tiếp theo.',
+                'timeStamp': '2024-09-29T12:26:08.500Z'
+            }
+
         ],
         'speakerDuration': {
             'TitaNyte Official': 163,
