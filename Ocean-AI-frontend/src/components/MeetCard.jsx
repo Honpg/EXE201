@@ -164,7 +164,7 @@ const reportTypes = [
 
                     <p className="w-full">
                         <p className="flex flex-wrap justify-between w-full">
-                            <p className="text-sm p-1"><strong className="mb-1 text-purple-900">Email:</strong> {meet.blabberEmail} </p><p className="text-sm p-1"> <strong className="text-blue-700">Duration:</strong> {calculateDuration(meet.meetingStartTimeStamp, meet.meetingEndTimeStamp)}</p>
+                            <p className="text-sm p-1"><strong className="mb-1 text-purple-900">Email:</strong> {meet.oceanAiEmail} </p><p className="text-sm p-1"> <strong className="text-blue-700">Duration:</strong> {calculateDuration(meet.meetingStartTimeStamp, meet.meetingEndTimeStamp)}</p>
                         </p>
                     </p>
 

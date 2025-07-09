@@ -7,21 +7,40 @@ exports.checkAuth = (req, res, next) => {
     if (!token) {
       return res.status(401).json({ status: "fail", message: 'Unauthorized access. Token not provided.' });
     }
-  
     try {
       const decodedToken = jwt.verify(token, process.env.JWT_KEY);
       // console.log("DECODED: ", decodedToken)
       if (!decodedToken || !decodedToken.email) {
         return res.status(401).json({ status: "fail", message: "Invalid token format" });
       }
-  
+
       const { email,name } = decodedToken;
       req.user = {email,name};
       
       next();
     } catch (error) {
       console.log(error);
-      return res.status(401).json({ status: "fail", message: 'Unauthorized access.' });
+      
+      // Xử lý cụ thể cho từng loại lỗi JWT
+      if (error.name === 'TokenExpiredError') {
+        return res.status(401).json({ 
+          status: "fail", 
+          message: 'Token has expired. Please login again.',
+          code: 'TOKEN_EXPIRED'
+        });
+      } else if (error.name === 'JsonWebTokenError') {
+        return res.status(401).json({ 
+          status: "fail", 
+          message: 'Invalid token.',
+          code: 'INVALID_TOKEN'
+        });
+      } else {
+        return res.status(401).json({ 
+          status: "fail", 
+          message: 'Unauthorized access.',
+          code: 'UNAUTHORIZED'
+        });
+      }
     }
   };
   

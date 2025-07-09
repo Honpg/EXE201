@@ -1,5 +1,5 @@
 {
-  "name": "Blabber",
+  "name": "Ocean AI",
   "version": "1.0",
   "manifest_version": 3,
   "description": "Simple Google Meet transcripts. Private and open source.",
@@ -26,7 +26,6 @@
   ],
   "permissions": [
     "storage",
-    "downloads",
     "identity", 
     "tabs",
     "activeTab",
@@ -34,13 +33,14 @@
   ],
   "host_permissions": [
     "https://meet.google.com/*",
-    "http://localhost:3000/"
+    "http://localhost:3000/",
+    "https://generativelanguage.googleapis.com/*"
   ],
   "background": {
     "service_worker": "background.js"
   },
   "oauth2": {
-    "client_id": "196322408899-7gtsl3m31uniu6046i763qsod7m2ah85.apps.googleusercontent.com",
+    "client_id": "663593030563-erqcbrlec76jr7si6m6sbdh761qs6vbn.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/userinfo.email",
       "https://www.googleapis.com/auth/userinfo.profile"

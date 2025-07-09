@@ -59,6 +59,22 @@ Check out the demo video to see Blabber in action: [Watch Demo Video](https://ww
 - blabber architecture.png – Architecture diagram for Blabber.
 - README.md – Setup guide and project documentation.
 
+## Git Configuration
+
+### .gitignore File
+
+The project includes a comprehensive `.gitignore` file that excludes:
+
+- **Python files**: `__pycache__/`, virtual environments (`env/`, `venv/`), build outputs
+- **Node.js files**: `node_modules/`, log files, build outputs (`dist/`)
+- **Environment files**: `.env` files containing sensitive information like API keys
+- **IDE/Editor files**: `.vscode/`, `.idea/`, editor temporary files
+- **Operating System files**: `.DS_Store`, `Thumbs.db`, system cache files
+- **Build outputs**: Compiled files, distribution folders, cache directories
+- **Chrome Extension**: Packaged extension files (`.crx`, `.pem`)
+
+This ensures that only source code and essential configuration files are tracked in version control, keeping the repository clean and secure.
+
 
 ## 1. AI-backend (Python - Flask)
 

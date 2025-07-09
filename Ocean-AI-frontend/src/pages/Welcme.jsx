@@ -3,15 +3,15 @@ function Welcome() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-200 text-gray-800 pt-20">
       <header className="text-center mb-10">
-        <h1 className="text-6xl font-bold text-purple-900 mb-4">Welcome to Blabber!</h1>
+        <h1 className="text-6xl font-bold text-purple-900 mb-4">Welcome to Ocean AI!</h1>
         <p className="text-xl text-gray-900">Your AI-powered meeting companion</p>
       </header>
 
       <main className="max-w-4xl mx-auto p-4">
         <section className="mb-10">
-          <h2 className="text-3xl font-semibold text-purple-700 mb-4">What is Blabber?</h2>
+          <h2 className="text-3xl font-semibold text-purple-700 mb-4">What is Ocean AI?</h2>
           <p className="text-lg leading-relaxed text-gray-800">
-            Blabber is a Chrome extension designed to help you manage and document your meetings seamlessly. With its AI-enabled features, you can easily keep track of your meetings, attendees, and speakers while generating comprehensive reports.
+            Ocean AI is a Chrome extension designed to help you manage and document your meetings seamlessly. With its AI-enabled features, you can easily keep track of your meetings, attendees, and speakers while generating comprehensive reports.
           </p>
         </section>
 
@@ -58,7 +58,7 @@ function Welcome() {
       </main>
 
       <footer className="mt-10 mb-4">
-        <p className="text-sm text-gray-500">Made with ❤️ by the Blabber team</p>
+        <p className="text-sm text-gray-500">Made with ❤️ by the Ocean AI team</p>
       </footer>
     </div>
   );

@@ -52,7 +52,6 @@ chrome.runtime.onInstalled.addListener(() => {
 
 });
 
-
 function downloadScreenshot(dataUrl) {
     chrome.downloads.download({
       url: dataUrl,
@@ -71,7 +70,14 @@ function downloadScreenshot(dataUrl) {
         });
       }
     });
-  }
+}
+
+function clearChatHistory() {
+    chrome.storage.local.remove('chatHistory', () => {
+      console.log('Chat history cleared from storage.');
+    });
+}
+}
 
 
 
@@ -123,28 +129,11 @@ function downloadScreenshot(dataUrl) {
 //   });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "capture_screenshot") {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const currentTab = tabs[0];
-      const meetUrlRegex = /^https:\/\/meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}(\?.*)?$/;
-
-      if (meetUrlRegex.test(currentTab.url)) {
-        chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
-          if (chrome.runtime.lastError || !dataUrl) {
-            alert('❌ Failed to capture screenshot: ' + (chrome.runtime.lastError?.message || 'Unknown error.'));
-            sendResponse({ success: false });
-          } else {
-            downloadScreenshot(dataUrl);
-            storeScreenshotUrl(dataUrl);
-            sendResponse({ success: true });
-          }
-        });
-      } else {
-        sendResponse({ success: false, message: "❌ Not a valid Google Meet page." });
-      }
-    });
-
-    return true; // ✅ Keep async messaging channel open
+  // ✅ Handle chatbot requests
+  if (message.action === "chatbot_query") {
+    // This can be extended to handle specific chatbot queries if needed
+    sendResponse({ success: true, message: "Chatbot query received" });
+    return true;
   }
 
   // ✅ Save meeting tab ID
@@ -165,8 +154,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.storage.local.set({ meetingTabId: null }, function () {
       console.log("🧹 Meeting tab id cleared");
     });
-    sendToBackend(); // ✅ Send transcript/chat to server (implement separately)
-    clearScreenshots(); // ✅ Cleanup function
+    sendToBackend(); // ✅ Send transcript/chat to server
+    clearChatHistory(); // ✅ Clear chat history instead of screenshots
     sendResponse({ success: true });
     return true;
   }
@@ -175,79 +164,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 
-//   function storeScreenshotUrl(dataUrl) {
-//     chrome.storage.local.get({ screenshots: [] }, (result) => {
-//       const screenshots = result.screenshots;
-//       screenshots.push(dataUrl); // Add the new screenshot URL to the array
-  
-//     //   // Optionally limit the number of stored screenshots
-//     //   if (screenshots.length > 10) {
-//     //     screenshots.shift(); // Remove the oldest screenshot if exceeding limit
-//     //   }
-  
-//       // Save the updated array back to storage
-//       chrome.storage.local.set({ screenshots: screenshots }, () => {
-//         console.log('Screenshots updated in storage:', screenshots);
-//       });
-//     });
-//   }
-  
-function storeScreenshotUrl(dataUrl) {
-    // Generate a unique filename using the current timestamp
-    const uniqueFilename = `screenshot_${Date.now()}.png`;
-
-    // Fetch the blabberEmail from Chrome storage
-    chrome.storage.local.get('oauthEmail', (result) => {
-        const blabberEmail = result.oauthEmail;
-
-        if (blabberEmail) {
-            // Prepare the data to send to your backend
-            const payload = {
-                filename: uniqueFilename,
-                imageData: dataUrl,
-                email: blabberEmail // Include the email in the payload
-            };
-
-            // Make a network request to your backend to send the image
-            fetch('http://localhost:3000/api/upload-screenshot', { // Replace with your actual backend URL
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Screenshot sent to backend successfully:', data);
-                // Update the screenshots array in Chrome storage
-                updateScreenshotsInStorage(uniqueFilename, blabberEmail);
-            })
-            .catch((error) => {
-                console.error('Error sending screenshot to backend:', error);
-            });
-        } else {
-            console.error('blabberEmail not found in storage.');
-        }
-    });
-}
-
-// Function to update the screenshots array in Chrome storage
-function updateScreenshotsInStorage(uniqueFilename, blabberEmail) {
-    const timestamp = new Date().toISOString();
-    console.log(uniqueFilename)
-    const screenshotEntry = {
-        filename: `${uniqueFilename}`,
-        timestamp: timestamp,
-        takenBy: blabberEmail
+// Chat history management functions
+function storeChatMessage(userMessage, botResponse) {
+    const chatEntry = {
+        timestamp: new Date().toISOString(),
+        userMessage: userMessage,
+        botResponse: botResponse
     };
 
-    chrome.storage.local.get({ screenshots: [] }, (result) => {
-        const screenshots = result.screenshots;
-        screenshots.push(screenshotEntry); // Add new screenshot entry
+    chrome.storage.local.get({ chatHistory: [] }, (result) => {
+        const chatHistory = result.chatHistory;
+        chatHistory.push(chatEntry);
 
-        // Save the updated array back to storage
-        chrome.storage.local.set({ screenshots: screenshots }, () => {
-            console.log('Screenshots updated in storage:', screenshots);
+        // Limit chat history to last 50 entries
+        if (chatHistory.length > 50) {
+            chatHistory.shift();
+        }
+
+        chrome.storage.local.set({ chatHistory: chatHistory }, () => {
+            console.log('Chat message stored:', chatEntry);
         });
     });
 }
@@ -258,6 +193,7 @@ function updateScreenshotsInStorage(uniqueFilename, blabberEmail) {
         if (tabid == data.meetingTabId) {
             console.log("Successfully intercepted tab close")
             sendToBackend()
+            clearChatHistory() // Clear chat history instead of screenshots
             chrome.storage.local.set({ meetingTabId: null }, function () {
                 console.log("Meeting tab id cleared for next meeting")
             })
@@ -277,7 +213,24 @@ function parseCustomTimestamp(timestamp,isFringe) {
 
     const dateObject = new Date(year, month - 1, day, hours, minutes, seconds);
 
-    return dateObject
+    // 4.1. Thử định dạng "HH-mm-ss DD-MM-YYYY"
+    if (timestamp.match(/^\d{2}-\d{2}-\d{2} \d{2}-\d{2}-\d{4}$/)) {
+        try {
+            const [timeStr, dateStr] = timestamp.split(' ');
+            const [hours, minutes, seconds] = timeStr.split('-').map(Number);
+            const [day, month, year] = dateStr.split('-').map(Number);
+            const parsedDate = new Date(year, month - 1, day, hours, minutes, seconds);
+            if (!isNaN(parsedDate.getTime())) {
+                return parsedDate;
+            }
+        } catch (e) {
+            console.warn(`Error parsing timestamp in format HH-mm-ss DD-MM-YYYY: ${e.message}`);
+        }
+    }
+
+    // 5. Fallback: If no known format is matched, return the current date
+    console.warn(`Could not parse timestamp in any known format: "${timestamp}". Using current date.`);
+    return new Date();
 }
 
 // function sendToBackend() {
@@ -314,7 +267,7 @@ function parseCustomTimestamp(timestamp,isFringe) {
 //                         timeStamp: parseCustomTimestamp(entry.timeStamp, false),
 //                         type: "chat",
 //                         duration: 0, // chat msgs don't count as spoken time
-//                         content: entry.chatMessageText
+//                         content: entry.personTranscript
 //                     });
 //                 });
 //             }
@@ -337,8 +290,8 @@ function parseCustomTimestamp(timestamp,isFringe) {
 //                     'Content-Type': 'application/json',
 //                 },
 //                 body: JSON.stringify({
-//                     blabberEmail: result.oauthEmail,
-//                     blabberName: result.oauthName,
+//                     oceanAiEmail: result.oauthEmail,
+//                     oceanAiName: result.oauthName,
 //                     screenshots: result.screenshots,
 //                     convenor: result.userName,
 //                     meetingTitle: result.meetingTitle || "Untitled Meeting",
@@ -384,7 +337,7 @@ async function sendToBackend() {
     const result = await getStorage([
       "userName", "transcript", "chatMessages", "meetingTitle",
       "meetingStartTimeStamp", "meetingEndTimeStamp", "attendees",
-      "speakers", "oauthEmail", "oauthName", "screenshots"
+      "speakers", "oauthEmail", "oauthName", "chatHistory"
     ]);
 
     console.log("Storage data:", result);
@@ -476,9 +429,9 @@ async function sendToBackend() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        blabberEmail: result.oauthEmail,
-        blabberName: result.oauthName,
-        screenshots: result.screenshots,
+        oceanAiEmail: result.oauthEmail,
+        oceanAiName: result.oauthName,
+        chatHistory: result.chatHistory || [], // Include chat history instead of screenshots
         convenor: result.userName,
         meetingTitle: result.meetingTitle || "Untitled Meeting",
         meetingStartTimeStamp: parseCustomTimestamp(result.meetingStartTimeStamp, true) || new Date().toISOString(),
@@ -506,9 +459,56 @@ async function sendToBackend() {
 
 
 
+  function parseCustomTimestamp(timestamp) {
+  try {
+    // Convert "12:45:24 20/06/2025" to "2025-06-20T12:45:24"
+    const [time, date] = timestamp.split(' ');
+    const [day, month, year] = date.split('/');
+    const isoFormat = `${year}-${month}-${day}T${time}`;
 
-function clearScreenshots() {
-    chrome.storage.local.remove('screenshots', () => {
-      console.log('Screenshots cleared from storage.');
-    });
+    // Parse the ISO format timestamp
+    const parsedDate = new Date(isoFormat);
+
+    if (isNaN(parsedDate.getTime())) {
+      throw new Error(`Invalid timestamp format: ${timestamp}`);
+    }
+
+    return parsedDate;
+  } catch (error) {
+    console.error(`Could not parse timestamp in any known format: "${timestamp}". Using current date.`);
+    return new Date();
   }
+}
+
+// Example usage
+const timestamp = "12:45:24 20/06/2025";
+const parsedDate = parseCustomTimestamp(timestamp);
+console.log("Parsed date:", parsedDate);
+
+function formatToVietnameseDate(date) {
+  const formatter = new Intl.DateTimeFormat('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+  return formatter.format(date);
+}
+
+function formatToVietnameseDateManual(date) {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+}
+
+// Example usage
+const date = new Date();
+console.log("Formatted date (Intl):", formatToVietnameseDate(date));
+console.log("Formatted date (Manual):", formatToVietnameseDateManual(date));
