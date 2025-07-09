@@ -15,12 +15,15 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 # --- Report Generation Libraries ---
 from reportlab.platypus import (Image, Paragraph, SimpleDocTemplate, Spacer,
                                 Table, TableStyle)
 # -----import 3rd class---
 from summary_llm import summarize_with_gemini
 from textblob import TextBlob
+from utils import SAMPLE_DATA_ENG, SAMPLE_DATA_VN
 
 # ==============================================================================
 # 2. REPORT CONTENT GENERATION
@@ -43,7 +46,7 @@ def generate_overall_summary(transcript_data: list) -> str:
     )
     return summarize_with_gemini(
         full_transcript,
-        "Provide a concise executive summary of this meeting transcript.",
+        "Provide a concise executive summary of this meeting transcript.If there use the Vietnamese, please write it in Vietnamese",
     )
 
 
@@ -58,7 +61,7 @@ def generate_key_takeaways(transcript_data: list) -> str:
     )
     return summarize_with_gemini(
         full_transcript,
-        "Extract the key takeaways and action items from this meeting transcript. Present them as a clear, scannable list.",
+        "List the key takeaways from this meeting. Use Vietnamese if appropriate, otherwise use English."
     )
 
 
@@ -73,7 +76,8 @@ def generate_speaker_summaries(transcript_data: list, speaker_durations: dict) -
     for speaker, points in speaker_contributions.items():
         combined_points = " ".join(points)
         summary = summarize_with_gemini(
-            combined_points, f"Summarize the key points made by {speaker}."
+            combined_points,
+            f"Summarize the key points made by {speaker}.If there use the Vietnamese, please write it in Vietnamese",
         )
         speaker_summaries[speaker] = {
             "summary": summary,
@@ -153,6 +157,17 @@ def analyze_speech(transcript_data: list) -> tuple[list, dict]:
     return analysis_results, dict(sentiment_summary)
 
 
+# Register the font
+pdfmetrics.registerFont(TTFont("DejaVuSans", "./fonts/DejaVuSans.ttf"))
+
+
+def fix_style():
+    styles = getSampleStyleSheet()
+    for name in styles.byName:
+        styles[name].fontName = "DejaVuSans"
+    return styles
+
+
 # ==============================================================================
 # 4. REPORT CREATION FUNCTIONS (PDF & DOCX)
 # ==============================================================================
@@ -160,9 +175,10 @@ def analyze_speech(transcript_data: list) -> tuple[list, dict]:
 
 # --- NORMAL REPORT ---
 def create_normal_report_pdf(meeting_data):
+
     file_name = f"./reports/{meeting_data['meetingTitle']}_summary_report.pdf"
     doc = SimpleDocTemplate(file_name, pagesize=A4)
-    styles = getSampleStyleSheet()
+    styles = fix_style()
     elements = [
         Paragraph(f"<b>{meeting_data['meetingTitle']}</b>", styles["Title"]),
         Spacer(1, 12),
@@ -245,7 +261,7 @@ def create_normal_report_docx(meeting_data):
 def create_sentiment_report_pdf(meeting_data):
     file_name = f"./reports/{meeting_data['meetingTitle']}_sentiment_report.pdf"
     doc = SimpleDocTemplate(file_name, pagesize=A4)
-    styles = getSampleStyleSheet()
+    styles = fix_style()
     analysis, sentiment_summary = analyze_speech(meeting_data["transcriptData"])
     chart_filename = generate_sentiment_pie_chart(sentiment_summary)
 
@@ -343,73 +359,12 @@ def generate_reports(
 
 if __name__ == "__main__":
     # Sample meeting data object for testing
-    sample_meeting_data = {
-        "meetingTitle": "Project-Sync-Meeting",
-        "convenor": "TitaNyte Official",
-        "speakers": ["TitaNyte Official", "Prateek"],
-        "meetingStartTimeStamp": "2024-09-29T12:20:48.000Z",
-        "meetingEndTimeStamp": "2024-09-29T12:26:09.000Z",
-        "attendees": ["Prateek", "TitaNyte Official"],
-        "speakerDuration": {"TitaNyte Official": 163, "Prateek": 104},
-        "transcriptData": [
-            {
-                "name": "TitaNyte Official",
-                "content": "Hi, how are you?",
-                "timeStamp": "2024-09-29T12:21:37.000Z",
-            },
-            {
-                "name": "Prateek",
-                "content": "Hi, I'm fine. So what's going to be the agenda of today's discussion",
-                "timeStamp": "2024-09-29T12:21:38.000Z",
-            },
-            {
-                "name": "Prateek",
-                "content": "Let's discuss about the features that our extension is going to give to the users. The first is that it will give transcriptions, which it will scrape from Google Meet captions.",
-                "timeStamp": "2024-09-29T12:21:45.000Z",
-            },
-            {
-                "name": "TitaNyte Official",
-                "content": "Sure. Once those transcripts are stored in the database, we have a generative AI model which takes these transcripts and then tries to create reports based on filters like speaker-based or interval-based reporting.",
-                "timeStamp": "2024-09-29T12:22:12.000Z",
-            },
-            {
-                "name": "TitaNyte Official",
-                "content": "On the front end, you log in using Google. As soon as you click the Generate button, a modal will pop up where you can enter the meeting title and choose the report format, like DOCX or PDF.",
-                "timeStamp": "2024-09-29T12:23:02.000Z",
-            },
-            {
-                "name": "TitaNyte Official",
-                "content": "You can also add Prompts to enhance the report creation. The extension also lets you take screenshots to keep track of what was shared during the meeting.",
-                "timeStamp": "2024-09-29T12:23:42.000Z",
-            },
-            {
-                "name": "Prateek",
-                "content": "Okay, so now I will be covering how anyone can use our extension through our repo. First, they'll have to clone the repository and install all the packages. It is already available on the Chrome store.",
-                "timeStamp": "2024-09-29T12:24:30.000Z",
-            },
-            {
-                "name": "Prateek",
-                "content": "They will have to do an NPM install for both front-end and back-end, and a pip install for the AI back-end. Afterwards, they will have to set the environment variables, which we will provide.",
-                "timeStamp": "2024-09-29T12:25:02.000Z",
-            },
-            {
-                "name": "TitaNyte Official",
-                "content": "You also have to add a .env.example file, which shows the format for the environment variables. I think we're good to go, right?",
-                "timeStamp": "2024-09-29T12:25:42.000Z",
-            },
-            {
-                "name": "Prateek",
-                "content": "Yeah, we are good to go. Thank you.",
-                "timeStamp": "2024-09-29T12:26:02.000Z",
-            },
-        ],
-    }
 
     # --- Generate all reports ---
     print("\n--- Starting Report Generation ---")
-    generate_reports(sample_meeting_data, report_type="Normal", format_type="PDF")
-    generate_reports(sample_meeting_data, report_type="Normal", format_type="DOCX")
-    generate_reports(sample_meeting_data, report_type="Sentiment", format_type="PDF")
-    generate_reports(sample_meeting_data, report_type="Sentiment", format_type="DOCX")
+    generate_reports(SAMPLE_DATA_VN, report_type="Normal", format_type="PDF")
+    generate_reports(SAMPLE_DATA_VN, report_type="Normal", format_type="DOCX")
+    generate_reports(SAMPLE_DATA_VN, report_type="Sentiment", format_type="PDF")
+    generate_reports(SAMPLE_DATA_VN, report_type="Sentiment", format_type="DOCX")
     print("\n--- Report Generation Complete ---")
     print("Check the './reports' directory for the output files.")
