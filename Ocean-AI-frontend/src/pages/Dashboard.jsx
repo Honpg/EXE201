@@ -65,12 +65,20 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center p-6">
+    <div className="relative min-h-screen flex flex-col items-center p-6 bg-gradient-to-br from-orange-200 via-pink-200 to-purple-200">
       <div className="flex justify-between w-full items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Meet Dashboard</h1>
+        {/* Meet Dashboard Section */}
+        <div className="dashboard-box hover:shadow-lg transition-shadow duration-300">
+          <h1 className="text-3xl font-bold dashboard-text">
+            Meet Dashboard
+          </h1>
+        </div>
 
-        <div className="flex items-center">
-          <span className="mr-2 text-gray-700">Get email report after every meet</span>
+        {/* Get email report section */}
+        <div className="dashboard-box hover:shadow-lg transition-shadow duration-300 flex items-center">
+          <span className="mr-3 dashboard-text">
+            Get email report after every meet
+          </span>
           <button
             className={`relative inline-flex items-center h-6 rounded-full w-11 focus:outline-none ${autoEnabled ? 'bg-blue-500' : 'bg-gray-300'}`}
             onClick={handleToggleChange}

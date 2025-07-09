@@ -28,7 +28,6 @@ async function loadConfig() {
                     const key = window.CONFIG.GEMINI_API_KEY;
                     const maskedKey = key.substring(0, 4) + '...' + key.substring(key.length - 4);
                     console.log('[Chatbot] API Key (masked):', maskedKey);
-                }
             }
             resolve();
         };

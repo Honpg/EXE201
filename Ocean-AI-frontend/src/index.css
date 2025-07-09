@@ -50,13 +50,49 @@
 }
 
 .logo-bg {
-  background: -webkit-linear-gradient( #ad00a2, #0c2eed);
+  background: -webkit-linear-gradient(45deg, #fb923c, #ec4899, #9333ea);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .nav-name:hover {
-  background: -webkit-linear-gradient( #ad00a2, #0c2eed);
+  background: white !important;
+  background-clip: padding-box !important;
+  -webkit-background-clip: padding-box !important;
+}
+
+.nav-name:hover span {
+  background: -webkit-linear-gradient(45deg, #fb923c, #ec4899, #9333ea) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.dashboard-box {
+  border: 2px solid transparent;
+  background: transparent;
+  transition: all 0.3s ease;
+  padding: 16px;
+}
+
+.dashboard-box:hover {
+  background: white !important;
+  border: 2px solid white !important;
+  border-radius: 8px;
+}
+
+.dashboard-box:hover .dashboard-text {
+  background: -webkit-linear-gradient(45deg, #fb923c, #ec4899, #9333ea) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.dashboard-text {
+  background: -webkit-linear-gradient(45deg, #fb923c, #ec4899, #9333ea);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
 }

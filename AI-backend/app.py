@@ -1,8 +1,6 @@
 from flask import Flask, send_from_directory, request, jsonify
 
 from report_generator import generate_reports # Main function to generate reports based on user input
-from report_generator import PDF_Type, DOCX_Type # Report formats
-from report_generator import NormalReport, SpeakerRankingReport, SentimentReport, IntervalReport # Report types
 
 app = Flask(__name__)
 
@@ -32,29 +30,29 @@ def get_report():
         return jsonify({'error':'Invalid meeting data'}), 400
 
     if report_type == 'normal':
-        report_type = NormalReport
+        report_type = 'Normal'
     elif report_type == 'speaker_ranking':
-        report_type = SpeakerRankingReport
+        report_type = 'SpeakerRanking'
     elif report_type == 'sentiment':
-        report_type = SentimentReport
+        report_type = 'Sentiment'
     elif report_type == 'interval':
-        report_type = IntervalReport
+        report_type = 'Interval'
     else:
         return jsonify({'error':'Invalid report type'}), 400
 
     if report_format == 'pdf':
-        report_format = PDF_Type
+        report_format = 'PDF'
     elif report_format == 'docx':
-        report_format = DOCX_Type
+        report_format = 'DOCX'
     else:
         return jsonify({'error':'Invalid report format'}), 400
 
     # Generate
-    if report_type == IntervalReport and not report_interval:
+    if report_type == 'Interval' and 'report_interval' not in receieved_data:
         return jsonify({'error':'Interval report needs interval'}), 400
     
-    if report_type == IntervalReport:
-        file_name = generate_reports(meeting_data, report_type, report_format, report_interval)
+    if report_type == 'Interval':
+        file_name = generate_reports(meeting_data, report_type, report_format, receieved_data['report_interval'])
     else:
         file_name = generate_reports(meeting_data, report_type, report_format)
     file_name = file_name.split('/')[-1] # file_name is the path to the file(including ./reports/), we only need the file name
