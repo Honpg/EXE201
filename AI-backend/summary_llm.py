@@ -1,10 +1,16 @@
 import os
+
 import google.generativeai as genai
-from google.api_core import exceptions as google_exception 
 from dotenv import load_dotenv
+from google.api_core import exceptions as google_exception
 from utils import INSTRUCTION
+
 load_dotenv()
-def summarize_with_gemini(text_to_summarize: str, instruction: str = INSTRUCTION) -> str:
+
+
+def summarize_with_gemini(
+    text_to_summarize: str, instruction: str = INSTRUCTION
+) -> str:
     """
     Summarizes a given text by calling the Google Gemini API.
 
@@ -25,7 +31,7 @@ def summarize_with_gemini(text_to_summarize: str, instruction: str = INSTRUCTION
         api_key = os.environ.get("GOOGLE_API_KEY")
         if not api_key:
             return "Error: GOOGLE_API_KEY environment variable not set. Please configure your API key."
-        
+
         genai.configure(api_key=api_key)
 
         # --- 3. Set Up the Model ---
@@ -34,22 +40,21 @@ def summarize_with_gemini(text_to_summarize: str, instruction: str = INSTRUCTION
             "temperature": 0.5,
             "top_p": 1,
             "top_k": 1,
-            "max_output_tokens": 256, # Adjust as needed
+            "max_output_tokens": 256,  # Adjust as needed
         }
-        
+
         # Initialize the Generative Model. 'gemini-1.5-flash-latest' is a fast and cost-effective model.
         model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash",
-            generation_config=generation_config
+            model_name="gemini-2.0-flash", generation_config=generation_config
         )
 
         # --- 4. Create the Prompt and Call the API ---
         # Construct the full prompt for the model.
         prompt = f"{instruction}\n\n---\n\n{text_to_summarize}"
-        
+
         # Generate the content using the model.
         response = model.generate_content(prompt)
-        
+
         # --- 5. Extract and Return the Summary ---
         summary = response.text.strip()
         return summary
@@ -65,6 +70,7 @@ def summarize_with_gemini(text_to_summarize: str, instruction: str = INSTRUCTION
         # Catch any other unexpected errors.
         print(f"An unexpected error occurred: {e}")
         return f"An unexpected error occurred during summarization. Details: {e}"
+
 
 # --- Example Usage ---
 if __name__ == "__main__":
@@ -85,7 +91,7 @@ if __name__ == "__main__":
 
     print("--- Summarizing Sample Text ---")
     summary_result = summarize_with_gemini(sample_text)
-    
+
     # Print the result in a formatted way.
     print("\n--- ORIGINAL TEXT ---")
     print(sample_text.strip())
@@ -95,4 +101,3 @@ if __name__ == "__main__":
     print("\n\n--- Testing Edge Case: No Input ---")
     error_result = summarize_with_gemini("")
     print(error_result)
-

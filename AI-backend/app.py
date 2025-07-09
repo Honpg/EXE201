@@ -1,6 +1,8 @@
 from flask import Flask, send_from_directory, request, jsonify
 
 from report_generator import generate_reports # Main function to generate reports based on user input
+from report_generator import PDF_Type, DOCX_Type # Report formats
+from report_generator import NormalReport, SpeakerRankingReport, SentimentReport, IntervalReport # Report types
 
 app = Flask(__name__)
 
@@ -29,33 +31,29 @@ def get_report():
     if "meetingTitle" not in meeting_data or "meetingStartTimeStamp" not in meeting_data or "meetingEndTimeStamp" not in meeting_data or "attendees" not in meeting_data or 'speakers' not in meeting_data or 'transcriptData' not in meeting_data or "speakerDuration" not in meeting_data:
         return jsonify({'error':'Invalid meeting data'}), 400
 
-    if report_type not in ['normal', 'speaker_ranking', 'sentiment', 'interval']:
+    if report_type == 'normal':
+        report_type = NormalReport
+    elif report_type == 'speaker_ranking':
+        report_type = SpeakerRankingReport
+    elif report_type == 'sentiment':
+        report_type = SentimentReport
+    elif report_type == 'interval':
+        report_type = IntervalReport
+    else:
         return jsonify({'error':'Invalid report type'}), 400
 
-    if report_format not in ['pdf', 'docx']:
+    if report_format == 'pdf':
+        report_format = PDF_Type
+    elif report_format == 'docx':
+        report_format = DOCX_Type
+    else:
         return jsonify({'error':'Invalid report format'}), 400
 
-    # Convert to the format expected by report_generator
-    report_type_map = {
-        'normal': 'Normal',
-        'speaker_ranking': 'SpeakerRanking', 
-        'sentiment': 'Sentiment',
-        'interval': 'Interval'
-    }
-    
-    report_format_map = {
-        'pdf': 'PDF',
-        'docx': 'DOCX'
-    }
-    
-    report_type = report_type_map[report_type]
-    report_format = report_format_map[report_format]
-
     # Generate
-    if report_type == 'Interval' and 'report_interval' not in receieved_data:
+    if report_type == IntervalReport and not report_interval:
         return jsonify({'error':'Interval report needs interval'}), 400
     
-    if report_type == 'Interval':
+    if report_type == IntervalReport:
         file_name = generate_reports(meeting_data, report_type, report_format, report_interval)
     else:
         file_name = generate_reports(meeting_data, report_type, report_format)
