@@ -184,8 +184,8 @@ async function sendToBackend() {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        blabberEmail: result.oauthEmail,
-        blabberName: result.oauthName,
+        oceanAiEmail: result.oauthEmail,
+        oceanAiName: result.oauthName,
         chatHistory: result.chatHistory || [],
         convenor: result.userName,
         meetingTitle: result.meetingTitle || "Untitled Meeting",

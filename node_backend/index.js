@@ -120,11 +120,16 @@ mongoose.connect(MONGO_URI, {
        console.log('Received /api/meet with body:', req.body);
       const meetData = req.body;
   
-      // Check if the user exists based on oceanAiEmail
+      // Check if the user exists based on oceanAiEmail (or legacy field for backward compatibility)
       const email = meetData?.oceanAiEmail;
+      console.log('Extracted email for user lookup:', email);
+      
+      // All fields should be using oceanAiEmail and oceanAiName consistently now
+      
       const user = await User.findOne({ email });
   
       if (!user) {
+        console.log('User not found with email:', email);
         throw new Error("This email isn't registered!");
       }
   
