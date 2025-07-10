@@ -1,57 +1,62 @@
-chrome.runtime.onInstalled.addListener(() => {
-    chrome.identity.getAuthToken({ interactive: true }, function (token) {
+chrome.runtime.onInstalled.addListener(async () => {
+  console.log("Extension installed. Starting authentication...");
+
+  try {
+    // 1. Get the Google OAuth Token
+    const token = await new Promise((resolve, reject) => {
+      chrome.identity.getAuthToken({ interactive: true }, (token) => {
         if (chrome.runtime.lastError || !token) {
-            console.log("Token", token);
-            console.error(chrome.runtime.lastError);
-            return;
+          reject(chrome.runtime.lastError?.message || "Token was not provided.");
+        } else {
+          resolve(token);
         }
+      });
+    });
+    console.log("Successfully retrieved Google token.");
 
-        // Fetch user info
-        fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
-            headers: {
-                Authorization: 'Bearer ' + token
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Store user information in Chrome storage
-            chrome.storage.local.set({ 
-                oauthEmail: data.email,
-                oauthName: data.name 
-            }, function() {
-                console.log(data.email, data.name);
-                console.log('User information stored in Chrome storage.');
+    // 2. Use the token to fetch user info
+    const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    if (!userInfoResponse.ok) throw new Error("Failed to fetch user info from Google.");
+    
+    const userInfo = await userInfoResponse.json();
+    console.log("Successfully fetched user info:", userInfo);
 
-                // Make fetch request to your API endpoint
-                fetch('http://localhost:3000/api/register-from-extension', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        email: data.email,
-                        name: data.name
-                    })
-                })
-                .then(result => {
-                    console.log('User registered:', result);
-                })
-                .catch(error => {
-                    console.error('Error registering user:', error);
-                });
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching user info:', error);
+    // 3. Save user info to Chrome Storage
+    await new Promise((resolve, reject) => {
+        chrome.storage.local.set({ 
+            oauthEmail: userInfo.email,
+            oauthName: userInfo.name 
+        }, () => {
+            if(chrome.runtime.lastError) reject("Failed to save user info to storage.");
+            else resolve();
         });
     });
+    console.log("User information saved to Chrome storage successfully.");
 
-    chrome.tabs.create({
-        url: 'http://localhost:5173/welcome' // Replace with your desired URL
-      });
+    // 4. Register the user with your backend
+    const registerResponse = await fetch('http://localhost:3000/api/register-from-extension', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: userInfo.email,
+        name: userInfo.name
+      })
+    });
+    if (!registerResponse.ok) throw new Error("Failed to register user with backend.");
 
+    const result = await registerResponse.json();
+    console.log('User registration with backend successful:', result);
+
+    // 5. Open the welcome page
+    chrome.tabs.create({ url: 'http://localhost:5173/welcome' });
+
+  } catch (error) {
+    console.error("--- An error occurred during the onInstalled process ---");
+    console.error(error);
+  }
 });
-
 
 function downloadScreenshot(dataUrl) {
     chrome.downloads.download({
@@ -264,20 +269,61 @@ function updateScreenshotsInStorage(uniqueFilename, blabberEmail) {
         }
     })
 })
-function parseCustomTimestamp(timestamp,isFringe) {
-    const [datePart, timePart] = timestamp.split(', ');
+/**
+ * Parses a timestamp string from various possible formats into a Date object.
+ * If parsing fails, it returns the current date as a fallback.
+ * @param {string} timestamp - The timestamp string to parse.
+ * @returns {Date} A valid Date object.
+ */
+function parseCustomTimestamp(timestamp) {
+  // 1. Guard Clause: Handle null, undefined, or non-string inputs
+  if (typeof timestamp !== 'string' || !timestamp.trim()) {
+    console.warn('Invalid or missing timestamp provided. Using current date as a fallback.');
+    return new Date();
+  }
 
-    const [day, month, year] = (isFringe ? datePart.split('-').map(Number) :  datePart.split('/').map(Number)) 
-    const [time, period] = timePart.split(' ');
-    let [hours, minutes, seconds] = (isFringe ? time.split('-').map(Number) : time.split(':').map(Number));
+  // 2. Try parsing as a standard ISO 8601 timestamp first (most reliable)
+  // This handles formats like "2025-06-09T10:42:18.000Z"
+  const isoDate = new Date(timestamp);
+  if (!isNaN(isoDate.getTime())) {
+    return isoDate;
+  }
 
-    if (seconds === undefined) {
-        seconds = 0;
+  // 3. Try parsing your format with a comma, e.g., "09/06/2025, 17:42:18"
+  if (timestamp.includes(',')) {
+    try {
+      const [datePart, timePart] = timestamp.split(', ');
+      const [day, month, year] = datePart.split('/').map(Number);
+      const [hours, minutes, seconds = 0] = timePart.split(':').map(Number);
+      // Create a date and check if it's valid
+      const parsedDate = new Date(year, month - 1, day, hours, minutes, seconds);
+      if (!isNaN(parsedDate.getTime())) {
+        return parsedDate;
+      }
+    } catch (e) {
+      // Ignore error and fall through to the next format
     }
+  }
 
-    const dateObject = new Date(year, month - 1, day, hours, minutes, seconds);
+  // 4. Try parsing your "new shape" format, e.g., "17-42-18 09-06-2025"
+  if (timestamp.includes(' ') && timestamp.includes('-')) {
+    try {
+      const [timeStr, dateStr] = timestamp.split(' ');
+      const [hours, minutes, seconds = 0] = timeStr.split('-').map(Number);
+      const [day, month, year] = dateStr.split('-').map(Number);
+      // Create a date and check if it's valid
+      const parsedDate = new Date(year, month - 1, day, hours, minutes, seconds);
+      if (!isNaN(parsedDate.getTime())) {
+        return parsedDate;
+      }
+    } catch (e) {
+      // Ignore error and fall through to the fallback
+    }
+  }
 
-    return dateObject
+  // 5. Fallback: If no known format is matched, return the current date
+  console.warn(`Could not parse timestamp in any known format: "${timestamp}". Using current date.`);
+  return new Date();
 }
 
 // function sendToBackend() {
