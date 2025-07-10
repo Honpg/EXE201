@@ -37,7 +37,8 @@
     "https://generativelanguage.googleapis.com/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "oauth2": {
     "client_id": "663593030563-erqcbrlec76jr7si6m6sbdh761qs6vbn.apps.googleusercontent.com",
