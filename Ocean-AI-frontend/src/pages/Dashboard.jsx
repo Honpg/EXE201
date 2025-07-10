@@ -69,18 +69,18 @@ const Dashboard = () => {
       <div className="flex justify-between w-full items-center mb-6">
         {/* Meet Dashboard Section */}
         <div className="dashboard-box hover:shadow-lg transition-shadow duration-300">
-          <h1 className="text-3xl font-bold dashboard-text">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 bg-clip-text text-transparent">
             Meet Dashboard
           </h1>
         </div>
 
         {/* Get email report section */}
         <div className="dashboard-box hover:shadow-lg transition-shadow duration-300 flex items-center">
-          <span className="mr-3 dashboard-text">
+          <span className="mr-3 bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 bg-clip-text text-transparent font-semibold">
             Get email report after every meet
           </span>
           <button
-            className={`relative inline-flex items-center h-6 rounded-full w-11 focus:outline-none ${autoEnabled ? 'bg-blue-500' : 'bg-gray-300'}`}
+            className={`relative inline-flex items-center h-6 rounded-full w-11 focus:outline-none ${autoEnabled ? 'bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600' : 'bg-gray-300'}`}
             onClick={handleToggleChange}
           >
             <span
@@ -95,8 +95,8 @@ const Dashboard = () => {
       {/* Loading State */}
       {loading && (
         <div className="flex flex-col items-center justify-center mt-10">
-          <FaSpinner className="animate-spin text-blue-500 text-4xl mb-2" />
-          <span className="text-xl font-semibold text-blue-500">Loading meets...</span>
+          <FaSpinner className="animate-spin text-purple-500 text-4xl mb-2" />
+          <span className="text-xl font-semibold bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 bg-clip-text text-transparent">Loading meets...</span>
         </div>
       )}
 
@@ -111,8 +111,8 @@ const Dashboard = () => {
       {/* No Meets Available State */}
       {!loading && !error && meets.length === 0 && (
         <div className="flex flex-col items-center justify-center mt-10">
-          <FaCalendarTimes className="text-gray-500 text-4xl mb-2" />
-          <span className="text-xl font-semibold text-gray-500">No meets available.</span>
+          <FaCalendarTimes className="text-gray-400 text-4xl mb-2" />
+          <span className="text-xl font-semibold text-gray-600">No meets available.</span>
         </div>
       )}
 

@@ -2,9 +2,15 @@ import { Link } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import iconPng from '../assets/icon.png';
+import { useEffect } from 'react';
 
 function Navbar() {
   const { state, dispatch } = useAuthContext();
+  
+  // Debug để kiểm tra thông tin user
+  useEffect(() => {
+    console.log("Navbar - Current user state:", state.user);
+  }, [state.user]);
 
   async function handleLogout() {
     await fetch("/api/oauth/logout");
@@ -33,7 +39,7 @@ function Navbar() {
               Dashboard
             </Link>
             <span className="text-white text-lg font-medium">
-              Hey, HonAI!
+              Hey, <strong>{state.user?.name || "Ocean User"}</strong>!
             </span>
             <button
               onClick={handleLogout}
