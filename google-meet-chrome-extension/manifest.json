@@ -40,7 +40,7 @@
     "service_worker": "background.js"
   },
   "oauth2": {
-    "client_id": "663593030563-erqcbrlec76jr7si6m6sbdh761qs6vbn.apps.googleusercontent.com",
+    "client_id": "659322758758-2h9opeeu78sts3qkag546g90o0hgo06c.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/userinfo.email",
       "https://www.googleapis.com/auth/userinfo.profile"
