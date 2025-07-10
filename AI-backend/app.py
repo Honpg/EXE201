@@ -1,62 +1,85 @@
-from flask import Flask, send_from_directory, request, jsonify
+import os
+from flask import Flask, jsonify, request, send_from_directory
 
-from report_generator import generate_reports # Main function to generate reports based on user input
+# --- Main function to generate reports based on user input ---
+from report_generator import generate_reports
 
 app = Flask(__name__)
 
-@app.route('/report',methods=['POST'])
+
+@app.route("/report", methods=["POST"])
 def get_report():
-    '''Expecting: {
-        "meeting_data": {},
-        "report_type": "normal"/"speaker_ranking"/"sentiment"/"interval",
-        "report_format": "pdf"/"docx"
-    }'''
-    receieved_data = request.json
+    """
+    API endpoint to generate and return a meeting report file.
+    Expects a JSON payload with meeting data and report specifications.
+    ---
+    JSON Payload Structure:
+    {
+        "meeting_data": { ... },
+        "report_type": "Normal" | "Sentiment",
+        "report_format": "PDF" | "DOCX",
+        "interval_minutes": int (optional, for future use)
+    }
+    """
+    received_data = request.json
 
-    if not receieved_data:
-        return jsonify({'error':'No data received'}), 400
+    if not received_data:
+        return jsonify({"error": "No JSON data received"}), 400
 
-    meeting_data = receieved_data['meeting_data']
-    report_type = receieved_data['report_type']
-    report_format = receieved_data['report_format']
+    # --- Extract and Validate Data ---
+    meeting_data = received_data.get("meeting_data")
+    report_type = received_data.get("report_type")
+    report_format = received_data.get("report_format")
+    interval_minutes = received_data.get("interval_minutes", 5)
 
-    if 'report_interval' in receieved_data:
-        report_interval = receieved_data['report_interval']
+    if not all([meeting_data, report_type, report_format]):
+        return jsonify({"error": "Missing required fields: meeting_data, report_type, or report_format"}), 400
 
-    # Validate meeting_data
-    if not meeting_data:
-        return jsonify({'error':'Meeting data is empty'}), 400
-    if "meetingTitle" not in meeting_data or "meetingStartTimeStamp" not in meeting_data or "meetingEndTimeStamp" not in meeting_data or "attendees" not in meeting_data or 'speakers' not in meeting_data or 'transcriptData' not in meeting_data or "speakerDuration" not in meeting_data:
-        return jsonify({'error':'Invalid meeting data'}), 400
+    # Validate essential keys in meeting_data
+    required_keys = [
+        "meetingTitle",
+        "meetingStartTimeStamp",
+        "meetingEndTimeStamp",
+        "convenor",
+        "attendees",
+        "transcriptData",
+        "speakerDuration",
+    ]
+    if not all(key in meeting_data for key in required_keys):
+        return jsonify({"error": "Invalid or incomplete meeting_data structure"}), 400
 
-    if report_type == 'normal':
-        report_type = 'Normal'
-    elif report_type == 'speaker_ranking':
-        report_type = 'SpeakerRanking'
-    elif report_type == 'sentiment':
-        report_type = 'Sentiment'
-    elif report_type == 'interval':
-        report_type = 'Interval'
-    else:
-        return jsonify({'error':'Invalid report type'}), 400
+    # --- Generate Report ---
+    try:
+        # The generate_reports function expects capitalized strings.
+        # It raises a ValueError for invalid combinations, which is caught below.
+        file_path = generate_reports(
+            meeting_data,
+            report_type=report_type,
+            format_type=report_format,
+            interval_minutes=interval_minutes,
+        )
 
-    if report_format == 'pdf':
-        report_format = 'PDF'
-    elif report_format == 'docx':
-        report_format = 'DOCX'
-    else:
-        return jsonify({'error':'Invalid report format'}), 400
+        if file_path is None:
+            # This case handles internal errors within the generation function
+            return jsonify({"error": "Report generation failed on the server."}), 500
 
-    # Generate
-    if report_type == 'Interval' and 'report_interval' not in receieved_data:
-        return jsonify({'error':'Interval report needs interval'}), 400
-    
-    if report_type == 'Interval':
-        file_name = generate_reports(meeting_data, report_type, report_format, receieved_data['report_interval'])
-    else:
-        file_name = generate_reports(meeting_data, report_type, report_format)
-    file_name = file_name.split('/')[-1] # file_name is the path to the file(including ./reports/), we only need the file name
-    return send_from_directory('./reports',file_name)
+        # --- Send File ---
+        directory = os.path.dirname(file_path)
+        filename = os.path.basename(file_path)
 
-if __name__ == '__main__':
-    app.run(port=8000,debug=True)
+        return send_from_directory(directory, filename, as_attachment=True)
+
+    except ValueError as e:
+        # Catches the "Invalid report/format combination" error from generate_reports
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        # Catch any other unexpected errors during file generation
+        print(f"An unexpected error occurred: {e}") # Log for debugging
+        return jsonify({"error": "An internal server error occurred."}), 500
+
+
+if __name__ == "__main__":
+    # Ensure the 'reports' directory exists before starting the app
+    if not os.path.exists("./reports"):
+        os.makedirs("./reports")
+    app.run(port=8000, debug=True)

@@ -42,6 +42,10 @@ async function(request, accessToken, refreshToken, profile, done) {
 } 
 ));
 
+console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID);
+console.log('GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET);
+console.log('All environment variables:', Object.keys(process.env));
+console.log('dotenv loaded:', require('dotenv').config({ debug: true }));
 
 const app = express();
 const PORT = process.env.PORT || 3000;

@@ -1,25 +1,48 @@
 chrome.runtime.onInstalled.addListener(() => {
-    chrome.identity.getAuthToken({ interactive: true }, function (token) {
-        if (chrome.runtime.lastError || !token) {
-            console.log("Token", token);
-            console.error(chrome.runtime.lastError);
+    console.log("Extension installed or updated!");
+    
+    // Sử dụng chrome.identity.getAuthToken nhưng với xử lý lỗi chi tiết hơn
+    chrome.identity.getAuthToken({ 
+        interactive: true,
+        // Đặt lại scope nếu cần
+        scopes: ["https://www.googleapis.com/auth/userinfo.email", 
+                 "https://www.googleapis.com/auth/userinfo.profile"]
+    }, function (token) {
+        console.log("Auth token attempt, result:", token ? "Token received" : "No token");
+        
+        if (chrome.runtime.lastError) {
+            console.error("Auth error details:", chrome.runtime.lastError);
+            // Hiển thị lỗi chi tiết để debug
+            if (chrome.runtime.lastError.message) {
+                console.error("Error message:", chrome.runtime.lastError.message);
+            }
+            return;
+        }
+        
+        if (!token) {
+            console.error("No token received despite no error");
             return;
         }
 
         // Fetch user info
+        console.log("Fetching user info with token");
         fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
             headers: {
                 Authorization: 'Bearer ' + token
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log("User info response status:", response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log("Received user data:", data);
             // Store user information in Chrome storage
             chrome.storage.local.set({ 
                 oauthEmail: data.email,
                 oauthName: data.name 
             }, function() {
-                console.log(data.email, data.name);
+                console.log("Stored in Chrome storage:", data.email, data.name);
                 console.log('User information stored in Chrome storage.');
 
                 // Make fetch request to your API endpoint
