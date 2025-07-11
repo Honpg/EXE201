@@ -1,11 +1,11 @@
 import os
 import re
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime,timedelta
 
 import matplotlib
+from nltk import data
 # --- Third-party Libraries ---
-from dotenv import load_dotenv
 
 matplotlib.use("Agg")  # Use non-GUI backend for plotting
 import docx
@@ -85,7 +85,44 @@ def generate_speaker_summaries(transcript_data: list, speaker_durations: dict) -
         }
     return speaker_summaries
 
+def generate_interval_summaries(transcript_data: list, interval_minutes: int) -> dict:
+    """Generates summaries for specified time intervals."""
+    if not transcript_data:
+        return {}
 
+    interval_summaries = {}
+    # Use 'timeStamp' instead of 'start_time'
+    start_time = datetime.fromisoformat(transcript_data[0]["timeStamp"].replace("Z", "+00:00"))
+    interval_delta = timedelta(minutes=interval_minutes)
+    current_interval_start = start_time
+    
+    # Also get the meeting end time from the last entry
+    last_entry_time = datetime.fromisoformat(transcript_data[-1]["timeStamp"].replace("Z", "+00:00"))
+
+    while current_interval_start <= last_entry_time:
+        interval_end = current_interval_start + interval_delta
+        interval_transcript = []
+
+        for entry in transcript_data:
+            # Use 'timeStamp' instead of 'start_time'
+            entry_time = datetime.fromisoformat(entry["timeStamp"].replace("Z", "+00:00"))
+            if current_interval_start <= entry_time < interval_end:
+                interval_transcript.append(f"{entry['name']}: {entry['content']}")
+
+        if interval_transcript:
+            full_interval_text = " ".join(interval_transcript)
+            interval_summary = summarize_with_gemini(
+                full_interval_text,
+                "Summarize the following conversation snippet. If Vietnamese is used, please write it in Vietnamese."
+            )
+            time_format = "%I:%M %p"
+            interval_label = f"{current_interval_start.strftime(time_format)} - {interval_end.strftime(time_format)}"
+            interval_summaries[interval_label] = interval_summary
+
+        # Move to the next interval
+        current_interval_start = interval_end
+            
+    return interval_summaries
 # ==============================================================================
 # 3. HELPER & UTILITY FUNCTIONS
 # ==============================================================================
@@ -302,6 +339,102 @@ def create_sentiment_report_docx(meeting_data):
     doc.save(file_name)
     return file_name
 
+# --- SPEAKER RANKING REPORT ---
+def create_speaker_ranking_report_pdf(meeting_data):
+    file_name = f"./reports/{meeting_data['meetingTitle']}_speaker_ranking_report.pdf"
+    doc = SimpleDocTemplate(file_name, pagesize=A4)
+    styles = fix_style()
+    elements = [
+        Paragraph("Speaker Ranking Report", styles["Title"]),
+        Spacer(1, 24),
+    ]
+
+    speaker_summaries = generate_speaker_summaries(
+        meeting_data["transcriptData"], meeting_data["speakerDuration"]
+    )
+    # Sort speakers by duration, descending
+    sorted_speakers = sorted(
+        speaker_summaries.items(), key=lambda item: item[1]["duration"], reverse=True
+    )
+
+    for i, (speaker, data) in enumerate(sorted_speakers, 1):
+        elements.append(Paragraph(f"<b>{i}. {speaker}</b>", styles["h2"]))
+        elements.append(Paragraph(f"Speaking Time: {data['duration']} seconds", styles["Normal"]))
+        elements.append(Paragraph("<b>Contribution Summary:</b>", styles["Normal"]))
+        elements.append(Paragraph(data["summary"], styles["BodyText"]))
+        elements.append(Spacer(1, 12))
+
+    doc.build(elements)
+    return file_name
+
+
+def create_speaker_ranking_report_docx(meeting_data):
+    file_name = f"./reports/{meeting_data['meetingTitle']}_speaker_ranking_report.docx"
+    doc = docx.Document()
+    doc.add_heading("Speaker Ranking Report", level=1)
+
+    speaker_summaries = generate_speaker_summaries(
+        meeting_data["transcriptData"], meeting_data["speakerDuration"]
+    )
+    # Sort speakers by duration, descending
+    sorted_speakers = sorted(
+        speaker_summaries.items(), key=lambda item: item[1]["duration"], reverse=True
+    )
+
+    for i, (speaker, data) in enumerate(sorted_speakers, 1):
+        doc.add_heading(f"{i}. {speaker}", level=2)
+        doc.add_paragraph(f"Speaking Time: {data['duration']} seconds")
+        doc.add_paragraph("Contribution Summary:")
+        doc.add_paragraph(data["summary"])
+
+    doc.save(file_name)
+    return file_name
+
+
+# --- INTERVAL REPORT ---
+def create_interval_report_pdf(meeting_data, interval_minutes):
+    file_name = f"./reports/{meeting_data['meetingTitle']}_interval_report.pdf"
+    doc = SimpleDocTemplate(file_name, pagesize=A4)
+    styles = fix_style()
+    elements = [
+        Paragraph(f"Interval Report ({interval_minutes}-Minute Intervals)", styles["Title"]),
+        Spacer(1, 24),
+    ]
+
+    interval_summaries = generate_interval_summaries(
+        meeting_data["transcriptData"], interval_minutes
+    )
+
+    if not interval_summaries:
+        elements.append(Paragraph("No conversations to report.", styles["Normal"]))
+    else:
+        for interval, summary in interval_summaries.items():
+            elements.append(Paragraph(f"<b>Interval: {interval}</b>", styles["h2"]))
+            elements.append(Paragraph(summary, styles["BodyText"]))
+            elements.append(Spacer(1, 12))
+
+    doc.build(elements)
+    return file_name
+
+
+def create_interval_report_docx(meeting_data, interval_minutes):
+    file_name = f"./reports/{meeting_data['meetingTitle']}_interval_report.docx"
+    doc = docx.Document()
+    doc.add_heading(f"Interval Report ({interval_minutes}-Minute Intervals)", level=1)
+
+    interval_summaries = generate_interval_summaries(
+        meeting_data["transcriptData"], interval_minutes
+    )
+
+    if not interval_summaries:
+        doc.add_paragraph("No conversations to report.")
+    else:
+        for interval, summary in interval_summaries.items():
+            doc.add_heading(f"Interval: {interval}", level=2)
+            doc.add_paragraph(summary)
+
+    doc.save(file_name)
+    return file_name
 
 # ... Add other report generation functions (SpeakerRanking, Interval) in a similar refactored style ...
 
@@ -329,10 +462,10 @@ def generate_reports(
         ("Normal", "DOCX"): create_normal_report_docx,
         ("Sentiment", "PDF"): create_sentiment_report_pdf,
         ("Sentiment", "DOCX"): create_sentiment_report_docx,
-        # ("SpeakerRanking", "PDF"): create_speaker_ranking_report_pdf, # Placeholder
-        # ("SpeakerRanking", "DOCX"): create_speaker_ranking_report_docx, # Placeholder
-        # ("Interval", "PDF"): create_interval_report_pdf, # Placeholder
-        # ("Interval", "DOCX"): create_interval_report_docx, # Placeholder
+        ("SpeakerRanking", "PDF"): create_speaker_ranking_report_pdf, 
+        ("SpeakerRanking", "DOCX"): create_speaker_ranking_report_docx,  
+        ("Interval", "PDF"): lambda data: create_interval_report_pdf(data, interval_minutes), 
+        ("Interval", "DOCX"):lambda data:  create_interval_report_docx(data, interval_minutes),  
     }
 
     func = report_functions.get((report_type, format_type))
@@ -362,9 +495,6 @@ if __name__ == "__main__":
 
     # --- Generate all reports ---
     print("\n--- Starting Report Generation ---")
-    generate_reports(SAMPLE_DATA_VN, report_type="Normal", format_type="PDF")
-    generate_reports(SAMPLE_DATA_VN, report_type="Normal", format_type="DOCX")
-    generate_reports(SAMPLE_DATA_VN, report_type="Sentiment", format_type="PDF")
-    generate_reports(SAMPLE_DATA_VN, report_type="Sentiment", format_type="DOCX")
+    generate_reports(SAMPLE_DATA_VN, report_type="Interval", format_type="PDF" )
     print("\n--- Report Generation Complete ---")
     print("Check the './reports' directory for the output files.")
