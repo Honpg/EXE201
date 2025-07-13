@@ -28,7 +28,7 @@ function Welcome() {
       setCurrentImageIndex((prevIndex) => 
         (prevIndex + 1) % demoImages.length
       );
-    }, 4500); // Change image every 4 seconds (slower)
+    }, 3000); // Change image every 4 seconds (slower)
 
     return () => clearInterval(interval);
   }, [demoImages.length]);
