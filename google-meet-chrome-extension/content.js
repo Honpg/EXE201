@@ -1,4 +1,4 @@
-//*********** GLOBAL VARIABLES **********//
+﻿//*********** GLOBAL VARIABLES **********//
 const timeFormat = {
   year: 'numeric',
   month: '2-digit',
@@ -229,7 +229,7 @@ async function checkExtensionStatus() {
 
 //           // Gửi message ngay sau khi chắc chắn dữ liệu đã được lưu
 //           chrome.runtime.sendMessage({ type: "end_meeting" }, function (response) {
-//             console.log("📤 Sent end_meeting message");
+//             console.log("� Sent end_meeting message");
 //           });
 //       })
 //     } catch (error) {
@@ -271,7 +271,7 @@ function meetingRoutines(uiType) {
         if (result.operationMode !== "manual") {
           captionsButton.click()
         } else {
-          console.log("🛠 Manual mode selected")
+          console.log("� Manual mode selected")
         }
       })
 
@@ -574,7 +574,7 @@ function showNotification(extensionStatusJSON) {
 //       personTranscript: captionLines.join(' ')
 //     };
 
-//     console.log("📢 Caption captured:", transcriptBlock.personTranscript);
+//     console.log(" Caption captured:", transcriptBlock.personTranscript);
 //     transcript.push(transcriptBlock);
 //     overWriteChromeStorage(["transcript"], false);
 
@@ -618,7 +618,7 @@ function transcriber(mutationsList, observer) {
           personNameBuffer = name;
           timeStampBuffer = timeStamp;
 
-          console.log("📢 Caption captured:", transcriptBlock);
+          console.log("Caption captured:", transcriptBlock);
           overWriteChromeStorage(["transcript"], false);
         }
       }
@@ -651,7 +651,7 @@ function transcriber(mutationsList, observer) {
 //       personTranscript: text
 //     };
 
-//     console.log("📢 Caption captured:", transcriptBlock.personTranscript);
+//     console.log(" Caption captured:", transcriptBlock.personTranscript);
 //     transcript.push(transcriptBlock);
 //     overWriteChromeStorage(["transcript"], false);
 
@@ -695,7 +695,7 @@ function transcriber(mutationsList, observer) {
 //           personNameBuffer = name;
 //           timeStampBuffer = timeStamp;
 
-//           console.log("📢 Caption captured:", transcriptBlock);
+//           console.log(" Caption captured:", transcriptBlock);
 //           overWriteChromeStorage(["transcript"], false);
 //         }
 //       }
@@ -739,7 +739,7 @@ function transcriber(mutationsList, observer) {
 //           personNameBuffer = name;
 //           timeStampBuffer = timeStamp;
 
-//           console.log("📢 Caption captured:", transcriptBlock);
+//           console.log(" Caption captured:", transcriptBlock);
 //           overWriteChromeStorage(["transcript"], false);
 //         }
 //       }
@@ -816,7 +816,7 @@ function pushUniqueChatBlock(chatBlock) {
 
 
 chrome.storage.local.get("transcript", (res) => {
-  console.log("📦 Transcript đã lưu:", res.transcript);
+  console.log("� Transcript đã lưu:", res.transcript);
 });
 
 
@@ -857,7 +857,7 @@ function overWriteChromeStorage(keys, endMeeting) {
 //   console.log(objectToSave.speakers);
 // }
 
-// // 👉 Gộp phần lưu chung bên dưới và chỉ gọi `sendMessage` khi lưu xong
+// // � Gộp phần lưu chung bên dưới và chỉ gọi `sendMessage` khi lưu xong
 // chrome.storage.local.set(objectToSave, function () {
 //   if (chrome.runtime.lastError) {
 //     console.error("❌ Error saving to chrome.storage:", chrome.runtime.lastError);
@@ -868,7 +868,7 @@ function overWriteChromeStorage(keys, endMeeting) {
 
 //   if (endMeeting && transcript.length > 0) {
 //     chrome.runtime.sendMessage({ type: "end_meeting" }, function (response) {
-//       console.log("📤 Sent end_meeting message");
+//       console.log("� Sent end_meeting message");
 //     });
 //   }
 // });
@@ -907,7 +907,7 @@ function overWriteChromeStorage(keys, endMeeting) {
 //     // Gửi message duy nhất sau khi lưu xong
 //     if (endMeeting) {
 //       chrome.runtime.sendMessage({ type: "end_meeting" }, function (response) {
-//         console.log("📤 Sent end_meeting message");
+//         console.log("� Sent end_meeting message");
 //       });
 //     }
 //   }
@@ -922,7 +922,7 @@ chrome.storage.local.set(objectToSave, () => {
 
     if (endMeeting) {
       chrome.runtime.sendMessage({ type: "end_meeting" }, function (response) {
-        console.log("📤 Sent end_meeting message");
+        console.log("� Sent end_meeting message");
       });
     }
   }
@@ -1020,3 +1020,6 @@ function updateMeetingTitle() {
     </div>
   </div>
 </div> */}
+
+
+

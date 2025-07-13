@@ -19,8 +19,8 @@ function App() {
     <Router>
       <Navbar />
       <Routes>
-        <Route path='/welcome' element={<Welcome />} />
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<Welcome />} />
+        <Route path='/home' element={<HomePage />} />
         <Route path="/success" element={state?.user ? <GoogleSuccess /> : <Navigate to="/" />} />
         <Route path="/failed" element={!state?.user ? <GoogleFailure /> : <Navigate to="/" />} />
         <Route path="/login" element={!state?.user ? <SignInPage /> : <Navigate to="/dashboard" />} />

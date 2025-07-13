@@ -19,10 +19,10 @@ function Navbar() {
   }
 
   return (
-    <nav className="bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 p-4 flex justify-between items-center shadow-lg">
+    <nav className="bg-black border-b border-gray-800 p-4 flex justify-between items-center">
       {/* Left side - Ocean AI logo */}
-      <div className="text-white text-2xl font-bold">
-        <Link to="/" className="nav-name transition-all duration-300 ease-in-out px-3 py-2 rounded-lg hover:bg-white hover:text-gray-800 flex items-center space-x-2">
+      <div>
+        <Link to="/" className="text-gray-300 hover:text-white transition-all duration-300 ease-in-out font-bold px-3 py-2 rounded-lg hover:bg-gray-800 flex items-center space-x-2 text-2xl">
           <img src={iconPng} alt="Ocean AI" className="w-8 h-8" />
           <span>Ocean AI</span>
         </Link>
@@ -32,13 +32,13 @@ function Navbar() {
       <div className="flex items-center space-x-6">
         {state?.user ? (
           <>
-           <Link to="/" className="text-white transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-white hover:text-gray-800">
+           <Link to="/home" className="text-gray-300 transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-gray-800 hover:text-white">
               Home
             </Link>
-             <Link to="/dashboard" className="text-white transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-white hover:text-gray-800">
+             <Link to="/dashboard" className="text-gray-300 transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-gray-800 hover:text-white">
               Dashboard
             </Link>
-            <Link to="/transaction" className="text-white transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-white hover:text-gray-800">
+            <Link to="/transaction" className="text-gray-300 transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-gray-800 hover:text-white">
               Transaction
             </Link>
             <span className="text-white text-lg font-medium">
@@ -46,17 +46,17 @@ function Navbar() {
             </span>
             <button
               onClick={handleLogout}
-              className="bg-gradient-to-r from-red-500 to-red-600 text-white py-2 px-4 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-300 font-medium"
+              className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-300 font-medium"
             >
               Logout
             </button>
           </>
         ) : (
           <>
-            <Link to="/" className="text-white transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-white hover:text-gray-800">
+            <Link to="/home" className="text-gray-300 transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-gray-800 hover:text-white">
               Home
             </Link>
-            <Link to="/login" className="text-white transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-white hover:text-gray-800">
+            <Link to="/login" className="text-gray-300 transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-gray-800 hover:text-white">
               Login
             </Link>
             

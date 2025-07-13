@@ -4,23 +4,27 @@
   <meta charset="UTF-8">
   <title>Ocean AI Chatbot</title>
   <style>
+    html {
+      background: #0a0e27 !important;
+    }
+    
     body {
       width: 420px;
       height: 600px;
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Arial Unicode MS', 'Noto Sans', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #0a0e27 0%, #1e1b4b 25%, #312e81 50%, #4338ca 75%, #6366f1 100%) !important;
       display: flex;
       flex-direction: column;
     }
 
     .header {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(30, 27, 75, 0.8);
       backdrop-filter: blur(10px);
       padding: 15px;
       text-align: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      border-bottom: 1px solid rgba(99, 102, 241, 0.3);
       position: relative;
     }
 
@@ -34,12 +38,12 @@
     }
 
     .control-btn {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(49, 46, 129, 0.4);
       border: none;
       border-radius: 50%;
       width: 32px;
       height: 32px;
-      color: white;
+      color: #e0e7ff;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -49,18 +53,18 @@
     }
 
     .control-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
+      background: rgba(67, 56, 202, 0.6);
       transform: scale(1.1);
     }
 
     .lock-btn.locked {
-      background: rgba(255, 215, 0, 0.8);
-      color: #333;
+      background: rgba(99, 102, 241, 0.8);
+      color: white;
     }
 
     .status-bar {
-      background: rgba(255, 215, 0, 0.9);
-      color: #333;
+      background: rgba(99, 102, 241, 0.9);
+      color: white;
       padding: 5px 10px;
       font-size: 0.75rem;
       text-align: center;
@@ -74,14 +78,14 @@
 
     .header h1 {
       margin: 0;
-      color: white;
+      color: #e0e7ff;
       font-size: 1.2rem;
       font-weight: 600;
     }
 
     .header p {
       margin: 5px 0 0 0;
-      color: rgba(255, 255, 255, 0.8);
+      color: rgba(196, 181, 253, 0.9);
       font-size: 0.85rem;
     }
 
@@ -131,25 +135,26 @@
     }
 
     .message.user .message-content {
-      background: #007AFF;
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
       color: white;
       border-bottom-right-radius: 5px;
     }
 
     .message.bot .message-content {
-      background: rgba(255, 255, 255, 0.9);
-      color: #333;
+      background: rgba(248, 250, 252, 0.95);
+      color: #1e1b4b;
       border-bottom-left-radius: 5px;
+      border: 1px solid rgba(99, 102, 241, 0.2);
     }
 
     .input-container {
       display: flex;
       gap: 10px;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(30, 27, 75, 0.8);
       padding: 12px;
       border-radius: 25px;
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.3);
     }
 
     .input-container input {
@@ -159,24 +164,24 @@
       padding: 14px 18px;
       border-radius: 22px;
       font-size: 0.9rem;
-      background: rgba(255, 255, 255, 0.95);
-      color: #333;
+      background: rgba(248, 250, 252, 0.95);
+      color: #1e1b4b;
       transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 8px rgba(10, 14, 39, 0.3);
     }
 
     .input-container input:focus {
       background: rgba(255, 255, 255, 1);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
       transform: translateY(-1px);
     }
 
     .input-container input::placeholder {
-      color: #666;
+      color: #6366f1;
     }
 
     .send-button {
-      background: linear-gradient(135deg, #007AFF 0%, #0056CC 100%);
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
       border: none;
       border-radius: 50%;
       width: 45px;
@@ -186,14 +191,14 @@
       justify-content: center;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
       backdrop-filter: blur(10px);
     }
 
     .send-button:hover {
-      background: linear-gradient(135deg, #0056CC 0%, #003d99 100%);
+      background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
       transform: scale(1.05);
-      box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
     }
 
     .send-button:active {
@@ -225,16 +230,17 @@
     }
 
     .typing-indicator .message-content {
-      background: rgba(255, 255, 255, 0.9);
-      color: #666;
+      background: rgba(248, 250, 252, 0.95);
+      color: #6366f1;
       font-style: italic;
+      border: 1px solid rgba(99, 102, 241, 0.2);
     }
 
     .back-button {
       position: absolute;
       top: 15px;
       left: 15px;
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(49, 46, 129, 0.4);
       border: none;
       border-radius: 50%;
       width: 35px;
@@ -245,13 +251,13 @@
       cursor: pointer;
       transition: all 0.3s ease;
       backdrop-filter: blur(10px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(10, 14, 39, 0.4);
     }
 
     .back-button:hover {
-      background: rgba(255, 255, 255, 0.4);
+      background: rgba(67, 56, 202, 0.6);
       transform: scale(1.1);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 6px 20px rgba(10, 14, 39, 0.5);
     }
 
     .back-button:active {
@@ -261,27 +267,8 @@
     .back-button svg {
       width: 18px;
       height: 18px;
-      fill: white;
+      fill: #e0e7ff;
       transition: fill 0.2s ease;
-    }
-
-    /* Custom scrollbar */
-    .chat-messages::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .chat-messages::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 2px;
-    }
-
-    .chat-messages::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 2px;
-    }
-
-    .chat-messages::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.5);
     }
 
     .error-message {
@@ -292,6 +279,25 @@
       margin-bottom: 10px;
       font-size: 0.85rem;
       text-align: center;
+    }
+
+    /* Custom scrollbar */
+    .chat-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+      background: rgba(49, 46, 129, 0.3);
+      border-radius: 2px;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.7);
+      border-radius: 2px;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.9);
     }
   </style>
 </head>
@@ -308,16 +314,15 @@
         ←
       </button>
       <button class="control-btn lock-btn" id="lock-btn" title="Lock/Unlock Popup">
-        🔒
+        Lock
       </button>
     </div>
     <h1>Ocean AI Assistant</h1>
-    <!-- <h1>🤖 Ocean AI Assistant</h1> -->
     <p>Ask me anything about your meetings!</p>
   </div>
 
   <div class="status-bar" id="status-bar">
-    🔒 Popup is locked - Click outside will not close this window
+    Popup is locked - Click outside will not close this window
   </div>
 
   <div class="chat-container">

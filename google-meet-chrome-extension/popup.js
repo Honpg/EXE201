@@ -112,7 +112,7 @@ function showChatbot() {
     // Add welcome message if not already shown
     if (!window.welcomeMessageShown) {
       setTimeout(() => {
-        addMessage("Hi! I'm your AI assistant. I can help you with questions about your meetings, transcripts, or anything else you'd like to know! 🤖", 'bot');
+        addMessage("Hi! I'm your AI assistant. I can help you with questions about your meetings, transcripts, or anything else you'd like to know!", 'bot');
         window.welcomeMessageShown = true;
       }, 500);
     }
@@ -483,7 +483,7 @@ function clearChat() {
     
     // Add welcome message again
     setTimeout(() => {
-      addMessage("Hi! I'm your AI assistant. I can help you with questions about your meetings, transcripts, or anything else you'd like to know! 🤖", 'bot');
+      addMessage("Hi! I'm your AI assistant. I can help you with questions about your meetings, transcripts, or anything else you'd like to know!", 'bot');
       window.welcomeMessageShown = true;
     }, 200);
   }

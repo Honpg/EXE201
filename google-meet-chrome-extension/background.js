@@ -265,7 +265,7 @@ chrome.runtime.onInstalled.addListener(async () => {
     const result = await registerResponse.json();
     console.log("User registered with backend:", result);
 
-    chrome.tabs.create({ url: 'http://localhost:5173/welcome' });
+    chrome.tabs.create({ url: 'http://localhost:5173' });
 
   } catch (error) {
     console.error("--- Error during onInstalled process ---");

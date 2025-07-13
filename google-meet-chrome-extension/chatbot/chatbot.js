@@ -1,4 +1,4 @@
-// chatbot.js - Ocean AI Chatbot Logic
+﻿// chatbot.js - Ocean AI Chatbot Logic
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('[Chatbot] DOM loaded, starting configuration loading');
@@ -28,7 +28,7 @@ async function loadConfig() {
                     const key = window.CONFIG.GEMINI_API_KEY;
                     const maskedKey = key.substring(0, 4) + '...' + key.substring(key.length - 4);
                     console.log('[Chatbot] API Key (masked):', maskedKey);
-            }
+            }}
             resolve();
         };
         script.onerror = (e) => {
@@ -87,7 +87,7 @@ function initializeChatbot() {
         console.log('[Chatbot] Lock toggled:', isLocked);
         
         if (isLocked) {
-            lockButton.textContent = '🔓';
+            lockButton.textContent = 'Unlock';
             lockButton.title = 'Unlock Popup (Click outside to keep open)';
             lockButton.classList.add('locked');
             statusBar.classList.add('show');
@@ -98,7 +98,7 @@ function initializeChatbot() {
             
             console.log('[Chatbot] Popup locked - will not close when clicking outside');
         } else {
-            lockButton.textContent = '🔒';
+            lockButton.textContent = 'Lock';
             lockButton.title = 'Lock Popup (Prevent auto-close)';
             lockButton.classList.remove('locked');
             statusBar.classList.remove('show');
@@ -170,11 +170,11 @@ function initializeChatbot() {
             console.error('[Chatbot] Error stack:', error.stack);
             
             // More detailed error message based on error type
-            let errorMessage = 'Sorry, I encountered an error while processing your request. Please try again later. / Xin lỗi, tôi gặp lỗi khi xử lý yêu cầu của bạn. Vui lòng thử lại sau. 🔧';
+            let errorMessage = 'Sorry, I encountered an error while processing your request. Please try again later. / Xin lỗi, tôi gặp lỗi khi xử lý yêu cầu của bạn. Vui lòng thử lại sau.';
             
             if (error.message.startsWith('QUOTA_EXCEEDED:')) {
                 const retryAfter = error.message.split(':')[1] || '24 hours';
-                errorMessage = `⚠️ API Quota Exceeded / Đã vượt quá giới hạn API:
+                errorMessage = `API Quota Exceeded / Đã vượt quá giới hạn API:
 
 • The free API key has reached its daily limit / API key miễn phí đã đạt giới hạn ngày
 • Please try again after ${retryAfter} / Vui lòng thử lại sau ${retryAfter}
@@ -183,13 +183,13 @@ function initializeChatbot() {
 For more information / Để biết thêm thông tin:
 https://ai.google.dev/gemini-api/docs/rate-limits`;
             } else if (error.message.includes('API request failed')) {
-                errorMessage = `🚨 API Error / Lỗi API: ${error.message}`;
+                errorMessage = ` API Error / Lỗi API: ${error.message}`;
             } else if (error.message.includes('fetch')) {
-                errorMessage = '🌐 Network Error: Unable to connect to Gemini API. Please check your internet connection. / Lỗi mạng: Không thể kết nối đến Gemini API. Vui lòng kiểm tra kết nối internet.';
+                errorMessage = ' Network Error: Unable to connect to Gemini API. Please check your internet connection. / Lỗi mạng: Không thể kết nối đến Gemini API. Vui lòng kiểm tra kết nối internet.';
             } else if (error.message.includes('timeout')) {
-                errorMessage = '⏰ Request timeout. The API took too long to respond. Please try again. / Hết thời gian chờ. API phản hồi quá chậm. Vui lòng thử lại.';
+                errorMessage = ' Request timeout. The API took too long to respond. Please try again. / Hết thời gian chờ. API phản hồi quá chậm. Vui lòng thử lại.';
             } else if (error.message.includes('JSON')) {
-                errorMessage = '📄 Response format error. The API returned an unexpected response format. / Lỗi định dạng phản hồi. API trả về định dạng không mong đợi.';
+                errorMessage = 'Response format error. The API returned an unexpected response format. / Lỗi định dạng phản hồi. API trả về định dạng không mong đợi.';
             }
             
             addMessage(errorMessage, 'bot');
@@ -363,7 +363,7 @@ https://ai.google.dev/gemini-api/docs/rate-limits`;
         // Check if API key is configured
         if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_API_KEY_HERE') {
             console.warn('[Chatbot] Invalid or placeholder API key detected');
-            return "⚠️ Gemini API key is not configured. Please set up your API key in the config.js file to use this feature.\n\nInstructions:\n1. Get API key from https://makersuite.google.com/app/apikey\n2. Update config.js with your key";
+            return "Gemini API key is not configured. Please set up your API key in the config.js file to use this feature.\n\nInstructions:\n1. Get API key from https://makersuite.google.com/app/apikey\n2. Update config.js with your key";
         }
 
         const prompt = `
@@ -531,11 +531,11 @@ Instructions: Analyze the user's question and respond naturally. If it's about m
             console.error('[Chatbot] Error message:', error.message);
             console.error('[Chatbot] Error stack:', error.stack);
             
-            let errorMessage = 'Sorry, I encountered an error while processing your request. Please try again later. / Xin lỗi, tôi gặp lỗi khi xử lý yêu cầu của bạn. Vui lòng thử lại sau. 🔧';
+            let errorMessage = 'Sorry, I encountered an error while processing your request. Please try again later. / Xin lỗi, tôi gặp lỗi khi xử lý yêu cầu của bạn. Vui lòng thử lại sau.';
             
             if (error.message.startsWith('QUOTA_EXCEEDED:')) {
                 const retryAfter = error.message.split(':')[1] || '24 hours';
-                errorMessage = `⚠️ API Quota Exceeded / Đã vượt quá giới hạn API:
+                errorMessage = `API Quota Exceeded / Đã vượt quá giới hạn API:
 
 • The free API key has reached its daily limit / API key miễn phí đã đạt giới hạn ngày
 • Please try again after ${retryAfter} / Vui lòng thử lại sau ${retryAfter}
@@ -544,13 +544,13 @@ Instructions: Analyze the user's question and respond naturally. If it's about m
 For more information / Để biết thêm thông tin:
 https://ai.google.dev/gemini-api/docs/rate-limits`;
             } else if (error.message.includes('API request failed')) {
-                errorMessage = `🚨 API Error / Lỗi API: ${error.message}`;
+                errorMessage = `API Error / Lỗi API: ${error.message}`;
             } else if (error.message.includes('fetch')) {
-                errorMessage = '🌐 Network Error: Unable to connect to Gemini API. Please check your internet connection. / Lỗi mạng: Không thể kết nối đến Gemini API. Vui lòng kiểm tra kết nối internet.';
+                errorMessage = 'Network Error: Unable to connect to Gemini API. Please check your internet connection. / Lỗi mạng: Không thể kết nối đến Gemini API. Vui lòng kiểm tra kết nối internet.';
             } else if (error.message.includes('timeout')) {
-                errorMessage = '⏰ Request timeout. The API took too long to respond. Please try again. / Hết thời gian chờ. API phản hồi quá chậm. Vui lòng thử lại.';
+                errorMessage = 'Request timeout. The API took too long to respond. Please try again. / Hết thời gian chờ. API phản hồi quá chậm. Vui lòng thử lại.';
             } else if (error.message.includes('JSON')) {
-                errorMessage = '📄 Response format error. The API returned an unexpected response format. / Lỗi định dạng phản hồi. API trả về định dạng không mong đợi.';
+                errorMessage = 'Response format error. The API returned an unexpected response format. / Lỗi định dạng phản hồi. API trả về định dạng không mong đợi.';
             }
             
             addMessage(errorMessage, 'bot');
@@ -567,7 +567,7 @@ https://ai.google.dev/gemini-api/docs/rate-limits`;
     // Add some sample interactions for demo purposes
     function addSampleMessages() {
         setTimeout(() => {
-            addMessage("💡 You can ask me things like:", 'bot');
+            addMessage("You can ask me things like:", 'bot');
         }, 1000);
         
         setTimeout(() => {
@@ -631,7 +631,7 @@ https://ai.google.dev/gemini-api/docs/rate-limits`;
     // Run initialization functions
     testVietnameseEncoding();
     addInitialGreeting();
-}
+
 
 // Export functions for testing
 window.OceanAIChatbot = {
@@ -731,3 +731,5 @@ function fixVietnameseEncoding(text) {
         return text; // Return original if fix fails
     }
 }
+
+

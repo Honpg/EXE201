@@ -53,9 +53,12 @@ const reportTypes = [
       maxWidth: '400px',
       width: '100%',
       borderRadius: '10px',
+      backgroundColor: '#111827', // gray-900
+      border: '1px solid #374151', // gray-700
+      color: '#f9fafb', // gray-50
     },
     overlay: {
-      backgroundColor: 'rgba(0, 0, 0, 0.1)', // Light transparent background
+      backgroundColor: 'rgba(0, 0, 0, 0.75)', // Darker transparent background
       zIndex: 1000, // Ensure it stays on top
     },
   };
@@ -147,38 +150,38 @@ const reportTypes = [
     };
 
     return (
-        <div className="border border-gray-200 bg-white shadow-lg rounded-xl p-6 m-4 hover:shadow-2xl hover:shadow-orange-200 transition-shadow duration-300">
+        <div className="border border-gray-800 bg-gray-900 shadow-lg rounded-xl p-6 m-4 hover:shadow-2xl hover:shadow-violet-500/20 transition-shadow duration-300">
             <div className="flex flex-row w-full">
                 <div className="flex flex-col items-start w-full">
                     <div className='flex flex-col md:flex-row justify-between'>
                         <div >
-                            <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 bg-clip-text text-transparent mb-2">{meet.meetingTitle}</h2>
-                            <p className="p-1 text-sm text-gray-500">Hosted by <span className="font-semibold">{meet.convenor}</span></p>
+                            <h2 className="text-2xl font-bold bg-gradient-to-r from-violet-400 to-purple-600 bg-clip-text text-transparent mb-2">{meet.meetingTitle}</h2>
+                            <p className="p-1 text-sm text-gray-400">Hosted by <span className="font-semibold text-white">{meet.convenor}</span></p>
                         </div>
                         <div className="mb-2 flex flex-wrap md:w-1/2 md:self-end">
-                            <p className="text-sm p-1"><strong className="mb-1 text-orange-600">From:</strong> {formatTime(meet.meetingStartTimeStamp)}  </p><p className="text-sm p-1"> <strong className="text-purple-600">To:</strong> {formatTime(meet.meetingEndTimeStamp)}</p>
+                            <p className="text-sm p-1"><strong className="mb-1 text-violet-400">From:</strong> <span className="text-gray-300">{formatTime(meet.meetingStartTimeStamp)}</span></p><p className="text-sm p-1"> <strong className="text-purple-400">To:</strong> <span className="text-gray-300">{formatTime(meet.meetingEndTimeStamp)}</span></p>
                         </div>
                     </div>
 
-                    <div className="w-full border-b border-gray-300 mb-2"></div>
+                    <div className="w-full border-b border-gray-700 mb-2"></div>
 
                     <p className="w-full">
                         <p className="flex flex-wrap justify-between w-full">
-                            <p className="text-sm p-1"><strong className="mb-1 text-orange-600">Email:</strong> {meet.oceanAiEmail} </p><p className="text-sm p-1"> <strong className="text-purple-600">Duration:</strong> {calculateDuration(meet.meetingStartTimeStamp, meet.meetingEndTimeStamp)}</p>
+                            <p className="text-sm p-1"><strong className="mb-1 text-violet-400">Email:</strong> <span className="text-gray-300">{meet.oceanAiEmail}</span></p><p className="text-sm p-1"> <strong className="text-purple-400">Duration:</strong> <span className="text-gray-300">{calculateDuration(meet.meetingStartTimeStamp, meet.meetingEndTimeStamp)}</span></p>
                         </p>
                     </p>
 
-                    <div className="w-full border-b border-gray-300 mb-2"></div>
+                    <div className="w-full border-b border-gray-700 mb-2"></div>
 
                     <p className="w-full">
                         <p className="mb-2 flex flex-wrap justify-between w-full">
-                            <p className="text-sm p-1"><strong className="text-gray-600">Speakers:</strong> {meet.speakers.length > 0 ? meet.speakers.join(', ') : 'No speakers'} </p>
-                            <p className="text-sm p-1"><strong className="text-gray-600">Attendees:</strong> {meet.attendees.length > 0 ? meet.attendees.join(', ') : 'No attendees'}</p>
+                            <p className="text-sm p-1"><strong className="text-gray-400">Speakers:</strong> <span className="text-gray-300">{meet.speakers.length > 0 ? meet.speakers.join(', ') : 'No speakers'}</span></p>
+                            <p className="text-sm p-1"><strong className="text-gray-400">Attendees:</strong> <span className="text-gray-300">{meet.attendees.length > 0 ? meet.attendees.join(', ') : 'No attendees'}</span></p>
                         </p>
                     </p>
                 <button
                     onClick={openModal}
-                    className="mt-1 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 text-white px-4 py-2 self-end rounded hover:from-orange-500 hover:via-pink-600 hover:to-purple-700 transition-all duration-300"
+                    className="mt-1 bg-gradient-to-r from-violet-500 to-purple-600 text-white px-4 py-2 self-end rounded hover:from-violet-600 hover:to-purple-700 transition-all duration-300"
                 >
                     Generate Report
                 </button>
@@ -191,30 +194,30 @@ const reportTypes = [
     style={customStyles}
     contentLabel="Generate Report Modal"
 >
-    <h2 className="text-xl font-bold mb-4">Generate Report for {meetingTitle}</h2>
+    <h2 className="text-xl font-bold mb-4 text-white">Generate Report for {meetingTitle}</h2>
 
     <form onSubmit={handleGenerateReport}>
         {/* Meeting Title */}
         <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Meeting Title:</label>
+            <label className="block text-gray-300 text-sm font-bold mb-2">Meeting Title:</label>
             <input
                 type="text"
                 value={meetingTitle}
                 onChange={(e) => setMeetingTitle(e.target.value)}
-                className="border rounded w-full py-2 px-3 text-gray-700"
+                className="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
             />
         </div>
 
         {/* Report Type Dropdown */}
         <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Type of Report:</label>
+            <label className="block text-gray-300 text-sm font-bold mb-2">Type of Report:</label>
             <select
                 value={reportType}
                 onChange={(e) => {
                     setReportType(e.target.value);
                     setInterval(undefined); // Reset the interval when report type changes
                 }}
-                className="border rounded w-full py-2 px-3 text-gray-700"
+                className="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                 required
             >
                 <option value="">Select Report Type</option>
@@ -232,7 +235,7 @@ const reportTypes = [
                     min="1"
                     value={interval}
                     onChange={(e) => setInterval(e.target.value)}
-                    className="border rounded w-full py-2 px-3 text-gray-700 mt-2"
+                    className="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent mt-2"
                     placeholder="Enter interval"
                 />
             )}
@@ -240,11 +243,11 @@ const reportTypes = [
 
         {/* Report Format Dropdown */}
         <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Choose a Format:</label>
+            <label className="block text-gray-300 text-sm font-bold mb-2">Choose a Format:</label>
             <select
                 value={reportFormat}
                 onChange={(e) => setReportFormat(e.target.value)}
-                className="border rounded w-full py-2 px-3 text-gray-700"
+                className="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                 required
             >
                 <option value="">Select Report Format</option>
@@ -258,7 +261,7 @@ const reportTypes = [
 
         {/* Email Input Field */}
         <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Send to these Email Addresses:</label>
+            <label className="block text-gray-300 text-sm font-bold mb-2">Send to these Email Addresses:</label>
             <div className="flex flex-col">
                 {emails.map((email, index) => (
                     <div key={index} className="flex items-center mb-2">
@@ -266,14 +269,14 @@ const reportTypes = [
                             type="email"
                             value={email}
                             onChange={(e) => handleEmailChange(e, index)}
-                            className="border rounded w-full py-2 px-3 text-gray-700 mr-2"
+                            className="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent mr-2"
                             placeholder="Enter email"
                             required
                         />
                         <button
                             type="button"
                             onClick={() => removeEmail(index)}
-                            className="px-2 py-1 bg-red-700 text-white rounded hover:bg-red-900"
+                            className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
                         >
                             Remove
                         </button>
@@ -282,7 +285,7 @@ const reportTypes = [
                 <button
                     type="button"
                     onClick={addEmail}
-                    className="mt-2 px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-900"
+                    className="mt-2 px-4 py-2 bg-violet-600 text-white rounded hover:bg-violet-700 transition-colors"
                 >
                     + Add Another Email
                 </button>
@@ -291,11 +294,11 @@ const reportTypes = [
 
         {/* Submit Button */}
         <div className="flex justify-end">
-            {error && <p className="text-red-500 mb-4">{error}</p>}
+            {error && <p className="text-red-400 mb-4">{error}</p>}
 
             <button
                 type="button"
-                className="mr-2 px-4 py-2 bg-gray-300 rounded"
+                className="mr-2 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
                 onClick={closeModal}
                 disabled={loading}
             >
@@ -303,7 +306,7 @@ const reportTypes = [
             </button>
             <button
                 type="submit"
-                className={`px-4 py-2 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 text-white rounded transition-all duration-300 ${loading ? 'opacity-50' : 'hover:from-orange-500 hover:via-pink-600 hover:to-purple-700'}`}
+                className={`px-4 py-2 bg-violet-600 text-white rounded transition-all duration-300 ${loading ? 'opacity-50' : 'hover:bg-violet-700'}`}
                 disabled={loading}
             >
                 {loading ? 'Generating...' : 'Generate Report'}

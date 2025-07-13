@@ -2,33 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-
-@font-face {
-    font-family: 'lilitaone';
-    font-style: normal;
-    font-weight: 200;
-    src: url(./fonts/Lilita_One/LilitaOne-Regular.ttf);
-}
-
-@font-face {
-  font-family: 'titilliumweb';
-  font-style: normal;
-  font-weight: 600;
-  src: url(./fonts/TitilliumWeb/TitilliumWeb-Regular.ttf);
-}
-
-@font-face {
-  font-family: 'notoserif';
-  font-style: normal;
-  font-weight: 400;
-  src: url(./fonts/Noto_Serif_Old_Uyghur/NotoSerifOldUyghur-Regular.ttf);
-}
-
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @layer base {
   html {
-    font-family: 'notoserif', serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
     min-height: 100vh;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
   }
 }
 

@@ -1,6 +1,6 @@
 function Footer() {
   return (
-    <footer className="footer-bottom fixed bottom-0 w-full py-3 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 text-center text-white">
+    <footer className="footer-bottom w-full py-3 bg-black border-t border-gray-800 text-center text-gray-400">
       &copy; {new Date().getFullYear()} Ocean AI. All rights reserved.
     </footer>
   );
