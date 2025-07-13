@@ -38,6 +38,9 @@ function Navbar() {
              <Link to="/dashboard" className="text-white transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-white hover:text-gray-800">
               Dashboard
             </Link>
+            <Link to="/transaction" className="text-white transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-white hover:text-gray-800">
+              Transaction
+            </Link>
             <span className="text-white text-lg font-medium">
               Hey, <strong>{state.user?.name || "Ocean User"}</strong>!
             </span>
@@ -56,6 +59,7 @@ function Navbar() {
             <Link to="/login" className="text-white transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-white hover:text-gray-800">
               Login
             </Link>
+            
           </>
         )}
       </div>
