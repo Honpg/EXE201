@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const Transaction = require('../models/Transaction');
 const { checkAuth } = require('../middleware/authMiddleware');
+const plans = require('../config/plans');
 
 router.post('/purchase', checkAuth, async (req, res) => {
   try {
@@ -14,6 +15,10 @@ router.post('/purchase', checkAuth, async (req, res) => {
   } catch (err) {
     res.status(400).json({ message: 'Purchase failed', error: err.message });
   }
+});
+
+router.get('/', (req, res) => {
+  res.json(plans);
 });
 
 module.exports = router;

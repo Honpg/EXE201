@@ -119,6 +119,7 @@ The AI-backend is responsible for handling AI-related tasks (e.g., generating re
 ## 2. node_backend (Node.js - Express)
 
 This Node.js backend integrates with the AI service and Chrome extension, and now provides session-based authentication with user roles and plan purchase endpoints.
+Available subscription plans are defined in `node_backend/config/plans.js`. You can retrieve them via `GET /api/plans`.
 
 ### Steps to set up the Node backend:
 
