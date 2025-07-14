@@ -27,6 +27,8 @@ const userSchema = new mongoose.Schema({
     enum: ['admin', 'user'],
     default: 'user'
   }
+}, {
+  timestamps: true // Thêm createdAt và updatedAt
 });
 
 userSchema.pre('save', async function(next) {

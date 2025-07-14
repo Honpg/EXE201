@@ -38,11 +38,28 @@ function Navbar() {
              <Link to="/dashboard" className="text-gray-300 transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-gray-800 hover:text-white">
               Dashboard
             </Link>
-            <Link to="/transaction" className="text-gray-300 transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-gray-800 hover:text-white">
-              Transaction
-            </Link>
+            
+            {/* Role-based navigation */}
+            {state.user.role === 'admin' ? (
+              <Link to="/admin" className="text-gray-300 transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-gray-800 hover:text-white">
+                👑 Admin Panel
+              </Link>
+            ) : (
+              <>
+                <Link to="/transaction" className="text-gray-300 transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-gray-800 hover:text-white">
+                  Plans
+                </Link>
+                <Link to="/my-transactions" className="text-gray-300 transition-all duration-300 ease-in-out font-medium px-3 py-2 rounded-lg hover:bg-gray-800 hover:text-white">
+                  My Plans
+                </Link>
+              </>
+            )}
+            
             <span className="text-white text-lg font-medium">
               Hey, <strong>{state.user?.name || "Ocean User"}</strong>!
+              {state.user.role === 'admin' && (
+                <span className="ml-2 text-xs bg-red-600 px-2 py-1 rounded-full">ADMIN</span>
+              )}
             </span>
             <button
               onClick={handleLogout}

@@ -233,7 +233,14 @@ app.get('/api/users/check', checkAuth, async (req, res) => {
       // console.log("User: ", user);
   
       if (user) {
-        res.status(200).json({ user: { email: user.email, name: user.name } }); // Return the user object with email
+        res.status(200).json({ 
+          user: { 
+            email: user.email, 
+            name: user.name,
+            role: user.role,
+            autoEnabled: user.autoEnabled
+          } 
+        }); // Return the user object with email
         return;
       }
 
@@ -241,8 +248,15 @@ app.get('/api/users/check', checkAuth, async (req, res) => {
         res.status(404);
         throw new Error("User doesn't exist");
       }
-  
-      res.status(200).json({ user: { email: user.email, name: user.name } });
+
+      res.status(200).json({ 
+        user: { 
+          email: user.email, 
+          name: user.name,
+          role: user.role,
+          autoEnabled: user.autoEnabled
+        } 
+      });
       
     } catch (error) {
       console.error('Error fetching user:', error);

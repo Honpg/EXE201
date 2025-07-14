@@ -1,31 +1,88 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useAuthContext } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Transaction = () => {
-  return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-black via-gray-900 to-black py-20 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-violet-600/20 border border-violet-500/30 text-violet-300 text-sm font-medium mb-8">
-            💳 Flexible Pricing Plans
-          </div>
-          
-          {/* Main Headline */}
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight tracking-tight">
-            Choose the perfect plan
-            <br />
-            <span className="bg-gradient-to-r from-violet-400 to-purple-600 bg-clip-text text-transparent">
-              for your needs
-            </span>
-          </h1>
-          
-          {/* Subtitle */}
-          <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Ocean AI builds a sustainable revenue stream through flexible subscription packages designed to meet the needs of individuals, teams, and enterprises.
-          </p>
+  const { state } = useAuthContext();
+  const navigate = useNavigate();
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [purchaseLoading, setPurchaseLoading] = useState(false);
+
+  // Redirect admin to admin panel
+  useEffect(() => {
+    if (state?.user?.role === 'admin') {
+      navigate('/admin');
+    }
+  }, [state?.user, navigate]);
+
+  const fetchPlans = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/plans');
+      if (response.ok) {
+        const data = await response.json();
+        setPlans(data);
+      }
+    } catch (error) {
+      console.error('Error fetching plans:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (state?.user?.role !== 'admin') {
+      fetchPlans();
+    }
+  }, [state?.user]);
+
+  const handlePurchase = async (planName, price) => {
+    try {
+      setPurchaseLoading(true);
+      const response = await fetch('/api/plans/purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ planName, price }),
+      });
+
+      if (response.ok) {
+        alert('Plan purchased successfully!');
+        // Redirect to my transactions page
+        navigate('/my-transactions');
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.message}`);
+      }
+    } catch (error) {
+      console.error('Error purchasing plan:', error);
+      alert('Failed to purchase plan. Please try again.');
+    } finally {
+      setPurchaseLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  };
+
+  // Don't render for admin (they get redirected)
+  if (state?.user?.role === 'admin') {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto mb-4"></div>
+          <p className="text-gray-400">Redirecting to Admin Panel...</p>
         </div>
-      </section>
+      </div>
+    );
+  }
 
       {/* Pricing Section */}
       <section className="py-20 px-4 bg-gradient-to-br from-black via-gray-900 to-black">

@@ -1,16 +1,26 @@
 const User = require('../models/userSchema');
+const jwt = require('jsonwebtoken');
 
 exports.checkAuth = async (req, res, next) => {
-  if (!req.session.userId) {
-    return res.status(401).json({ message: 'Not logged in' });
-  }
   try {
-    const user = await User.findById(req.session.userId);
-    if (!user) return res.status(401).json({ message: 'User not found' });
+    const token = req.cookies.token;
+    
+    if (!token) {
+      return res.status(401).json({ message: 'Not logged in - no token provided' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_KEY);
+    const user = await User.findOne({ email: decoded.email });
+    
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+    
     req.user = user;
     next();
   } catch (err) {
-    res.status(401).json({ message: 'Auth failed' });
+    console.error('Auth error:', err);
+    res.status(401).json({ message: 'Auth failed', error: err.message });
   }
 };
 

@@ -10,7 +10,9 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Dashboard from './pages/Dashboard';
 import Welcome from './pages/Welcme';
-import Transaction from './pages/Transaction';
+import TransactionNew from './pages/TransactionNew';
+import AdminDashboard from './pages/AdminDashboard';
+import UserTransactions from './pages/UserTransactions';
 
 function App() {
   const { state } = useAuthContext();
@@ -25,7 +27,16 @@ function App() {
         <Route path="/failed" element={!state?.user ? <GoogleFailure /> : <Navigate to="/" />} />
         <Route path="/login" element={!state?.user ? <SignInPage /> : <Navigate to="/dashboard" />} />
         <Route path="/dashboard" element={state?.user ? <Dashboard /> : <Navigate to="/login" />} />
-        <Route path="/transaction" element={state?.user ? <Transaction /> : <Navigate to="/login" />} />
+        <Route path="/transaction" element={state?.user ? <TransactionNew /> : <Navigate to="/login" />} />
+        <Route path="/my-transactions" element={state?.user ? <UserTransactions /> : <Navigate to="/login" />} />
+        <Route 
+          path="/admin" 
+          element={
+            state?.user && state.user.role === 'admin' 
+              ? <AdminDashboard /> 
+              : <Navigate to="/login" />
+          } 
+        />
       </Routes>
       <ToastContainer />
       <Footer />
