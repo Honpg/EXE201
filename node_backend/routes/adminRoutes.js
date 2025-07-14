@@ -95,4 +95,21 @@ router.get('/stats', checkAuth, authorize(['admin']), async (req, res) => {
   }
 });
 
+// Admin hủy plan của user
+router.delete('/transactions/:transactionId', checkAuth, authorize(['admin']), async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+    
+    const transaction = await Transaction.findById(transactionId);
+    if (!transaction) {
+      return res.status(404).json({ message: 'Transaction not found' });
+    }
+    
+    await Transaction.findByIdAndDelete(transactionId);
+    res.json({ message: 'Transaction cancelled successfully by admin' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error cancelling transaction', error: error.message });
+  }
+});
+
 module.exports = router;

@@ -47,4 +47,27 @@ router.get('/my-plans', checkAuth, async (req, res) => {
   }
 });
 
+// Hủy plan của user hiện tại
+router.delete('/cancel/:transactionId', checkAuth, async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+    
+    // Tìm transaction và kiểm tra quyền sở hữu
+    const transaction = await Transaction.findById(transactionId);
+    if (!transaction) {
+      return res.status(404).json({ message: 'Transaction not found' });
+    }
+    
+    // Chỉ cho phép user hủy plan của chính mình (trừ admin có thể hủy tất cả)
+    if (req.user.role !== 'admin' && transaction.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'You can only cancel your own plans' });
+    }
+    
+    await Transaction.findByIdAndDelete(transactionId);
+    res.json({ message: 'Plan cancelled successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error cancelling plan', error: error.message });
+  }
+});
+
 module.exports = router;

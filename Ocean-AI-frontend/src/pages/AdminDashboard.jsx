@@ -9,6 +9,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(null);
 
   // Debug log
   useEffect(() => {
@@ -97,6 +98,34 @@ const AdminDashboard = () => {
       style: 'currency',
       currency: 'USD'
     }).format(amount);
+  };
+
+  const handleCancelTransaction = async (transactionId) => {
+    if (!confirm('Are you sure you want to cancel this transaction? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setCancelLoading(transactionId);
+      const response = await fetch(`/api/admin/transactions/${transactionId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        alert('Transaction cancelled successfully!');
+        fetchTransactions(); // Refresh the transactions list
+        fetchStats(); // Refresh stats
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.message}`);
+      }
+    } catch (error) {
+      console.error('Error cancelling transaction:', error);
+      alert('Failed to cancel transaction. Please try again.');
+    } finally {
+      setCancelLoading(null);
+    }
   };
 
   if (!user || user.role !== 'admin') {
@@ -226,6 +255,9 @@ const AdminDashboard = () => {
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                           Date
                         </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-800">
@@ -259,11 +291,47 @@ const AdminDashboard = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                             {formatDate(transaction.createdAt)}
                           </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                            <button
+                              onClick={() => handleCancelTransaction(transaction._id)}
+                              className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full transition-all ${
+                                cancelLoading === transaction._id
+                                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                                  : 'bg-red-600 text-white hover:bg-red-700'
+                              }`}
+                              disabled={cancelLoading === transaction._id}
+                            >
+                              {cancelLoading === transaction._id ? (
+                                <svg
+                                  className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  />
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                  />
+                                </svg>
+                              ) : (
+                                'Cancel'
+                              )}
+                            </button>
+                          </td>
                         </tr>
                       ))}
                       {transactions.length === 0 && (
                         <tr>
-                          <td colSpan="4" className="px-6 py-8 text-center text-gray-400">
+                          <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
                             No transactions found
                           </td>
                         </tr>

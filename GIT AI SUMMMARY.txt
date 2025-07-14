@@ -24,4 +24,8 @@ npm install
 
 npm run dev
 
+4.create admin 
 
+npm run create-admin
+
+npm run list-admins
