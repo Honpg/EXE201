@@ -54,12 +54,21 @@ console.log('dotenv loaded:', require('dotenv').config({ debug: true }));
 const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
-const AI_SERVER_URL = process.env.AI_SERVER_URL;
+const AI_SERVER_URL = process.env.AI_SERVER_URL || 'http://localhost:8000';
 let reportBuffer = []; // Buffer to store report data
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    port: PORT
+  });
+});
 
 app.get('/', (req, res) => {
-  res.send('Node.js backend is running!');
+  res.send('Ocean AI Node.js backend is running!');
 });
 
 // // // app.use(cors());
@@ -95,10 +104,21 @@ app.get('/', (req, res) => {
 
 app.use(cors({
   origin: function(origin, callback) {
-    // ⚠️ Cho phép extension bất kỳ trong chế độ dev
-    if (!origin || origin.startsWith("chrome-extension://") || origin === "http://localhost:5173") {
+    // Allow Azure domains and development
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'https://oceanai.azurewebsites.net',
+      'https://oceanai-frontend.azurewebsites.net',
+      'chrome-extension://'
+    ];
+    
+    if (!origin) return callback(null, true);
+    
+    if (origin.startsWith("chrome-extension://") || 
+        allowedOrigins.some(allowed => origin.startsWith(allowed))) {
       return callback(null, true);
     }
+    
     return callback(new Error("Not allowed by CORS"), false);
   },
   credentials: true

@@ -47,7 +47,7 @@ function setupPopup() {
 function setupAuth() {
   console.log('Setting up auth...');
   
-  fetch("http://localhost:3000/api/users/check", {
+  fetch(`${window.OCEAN_AI_CONFIG?.API_BASE_URL || 'https://oceanai.azurewebsites.net'}/api/users/check`, {
     method: "GET",
     credentials: "include"
   })

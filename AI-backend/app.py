@@ -1,5 +1,6 @@
 import os
 from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
 import traceback
 import json
 
@@ -7,6 +8,31 @@ import json
 from report_generator import generate_reports
 
 app = Flask(__name__)
+
+# Configure CORS for Azure
+CORS(app, origins=[
+    "https://meet.google.com",
+    "https://oceanai.azurewebsites.net",
+    "https://oceanai-frontend.azurewebsites.net",
+    "http://localhost:3000" if os.getenv('FLASK_ENV') == 'development' else None,
+    "http://localhost:5173" if os.getenv('FLASK_ENV') == 'development' else None
+])
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({
+        'status': 'OK',
+        'timestamp': str(os.popen('date').read().strip()),
+        'environment': os.getenv('FLASK_ENV', 'development'),
+        'port': os.getenv('PORT', '8000')
+    })
+
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({
+        'message': 'Ocean AI Backend is running!',
+        'status': 'active'
+    })
 
 @app.route("/report", methods=["POST"])
 def get_report():
@@ -107,5 +133,13 @@ if __name__ == "__main__":
     # Ensure the 'reports' directory exists before starting the app
     if not os.path.exists("./reports"):
         os.makedirs("./reports")
-    app.run(port=8000, debug=True)
+    
+    port = int(os.environ.get('PORT', 8000))
+    debug = os.environ.get('FLASK_ENV') == 'development'
+    
+    app.run(
+        host='0.0.0.0',
+        port=port, 
+        debug=debug
+    )
 

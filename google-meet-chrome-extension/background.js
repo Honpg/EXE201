@@ -1,5 +1,18 @@
 // background.js
 
+// API Configuration
+const API_CONFIG = {
+  development: 'http://localhost:3000',
+  production: 'https://oceanai.azurewebsites.net'
+};
+
+// Auto detect environment
+const isProduction = !chrome.runtime.getManifest().key;
+const API_BASE_URL = isProduction ? API_CONFIG.production : API_CONFIG.development;
+
+console.log(`Ocean AI Extension running in ${isProduction ? 'production' : 'development'} mode`);
+console.log(`API Base URL: ${API_BASE_URL}`);
+
 /**
  * Parse custom timestamp string into a Date object.
  * Handles various formats and falls back to current date if parsing fails.
@@ -157,7 +170,7 @@ async function sendToBackend() {
     const speakersArray = Array.from(allSpeakerNames);
 
     // Register user first
-    const registerRes = await fetch('http://localhost:3000/api/register-from-extension', {
+    const registerRes = await fetch(`${API_BASE_URL}/api/register-from-extension`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -178,7 +191,7 @@ async function sendToBackend() {
     }
 
     // Send meeting data
-    const meetRes = await fetch('http://localhost:3000/api/meet', {
+    const meetRes = await fetch(`${API_BASE_URL}/api/meet`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -251,7 +264,7 @@ chrome.runtime.onInstalled.addListener(async () => {
     console.log("User info saved to storage.");
 
     // Register user
-    const registerResponse = await fetch('http://localhost:3000/api/register-from-extension', {
+    const registerResponse = await fetch(`${API_BASE_URL}/api/register-from-extension`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

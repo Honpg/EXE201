@@ -13,6 +13,7 @@
   "content_scripts": [
     {
       "js": [
+        "config.js",
         "content.js"
       ],
       "run_at": "document_end",
@@ -34,6 +35,7 @@
   "host_permissions": [
     "https://meet.google.com/*",
     "http://localhost:3000/",
+    "https://oceanai.azurewebsites.net/*",
     "https://generativelanguage.googleapis.com/*"
   ],
   "background": {

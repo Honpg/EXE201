@@ -29,7 +29,7 @@ const CONFIG = {
     
     // Backend API settings
     BACKEND: {
-        BASE_URL: envConfig.BACKEND_URL || 'http://localhost:3000',
+        BASE_URL: envConfig.BACKEND_URL || 'https://oceanai.azurewebsites.net',
         ENDPOINTS: {
             REGISTER: '/api/register-from-extension',
             MEET: '/api/meet',
