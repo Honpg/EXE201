@@ -462,8 +462,8 @@ def generate_reports(
         ("Normal", "DOCX"): create_normal_report_docx,
         ("Sentiment", "PDF"): create_sentiment_report_pdf,
         ("Sentiment", "DOCX"): create_sentiment_report_docx,
-        ("SpeakerRanking", "PDF"): create_speaker_ranking_report_pdf, 
-        ("SpeakerRanking", "DOCX"): create_speaker_ranking_report_docx,  
+        ("Speaker_ranking", "PDF"): create_speaker_ranking_report_pdf, 
+        ("Speaker_ranking", "DOCX"): create_speaker_ranking_report_docx,  
         ("Interval", "PDF"): lambda data: create_interval_report_pdf(data, interval_minutes), 
         ("Interval", "DOCX"):lambda data:  create_interval_report_docx(data, interval_minutes),  
     }
