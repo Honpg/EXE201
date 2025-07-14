@@ -14,6 +14,11 @@ const userSchema = new mongoose.Schema({
     trim: true,
     validate: [validator.isEmail, 'Entered email address not valid!']
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
   autoEnabled: {
     type: Boolean,
     default: false // Set default to false

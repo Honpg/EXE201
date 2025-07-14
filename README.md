@@ -205,9 +205,12 @@ This directory contains the Chrome extension that integrates Blabber with Google
 
 ### Additional Notes:
 
-- Database Setup (MongoDB): 
+- Database Setup (MongoDB):
    - You will need a MongoDB database for storing user information, meeting details, etc.
    - Make sure to add your MongoDB URI in the .env file of the Node backend as MONGO_URI.
+- User Roles:
+   - Each user document includes a `role` field with the options `user` or `admin`.
+   - The role defaults to `user` when creating a new account.
 
 - AI Integration:
    - The AI-backend and node_backend should both be running simultaneously for full integration (AI tasks like generating reports are handled in the Python backend, while the Node.js backend manages API requests).

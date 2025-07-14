@@ -34,7 +34,9 @@ async function(request, accessToken, refreshToken, profile, done) {
     const email = profile?.emails[0]?.value;
     let user = await User.findOne({ email });
     
-    if (!user) user = await User.create({ email, name: profile?.displayName });
+    if (!user) {
+      user = await User.create({ email, name: profile?.displayName, role: 'user' });
+    }
     return done(null, user); 
   } catch (err) {
     return done(err, false);
@@ -324,7 +326,7 @@ app.post('/api/register-from-extension', async (req, res) => {
     // Kiểm tra xem người dùng đã tồn tại chưa
     let user = await User.findOne({ email });
     if (!user) {
-      user = await User.create({ email, name });
+      user = await User.create({ email, name, role: 'user' });
     }
 
     res.status(200).json({ message: 'User registered successfully', user });
