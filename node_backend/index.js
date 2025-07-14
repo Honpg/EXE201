@@ -6,6 +6,7 @@ console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
 console.log("======== END TEST ========");
 // console.log("AI_SERVER_URL:", process.env.AI_SERVER_URL);
 const express = require('express');
+const session = require('express-session');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const cors = require('cors');
@@ -20,6 +21,9 @@ const fs = require('fs');
 const path = require('path');
 const { pipeline,Readable } = require('stream');
 const nodemailer = require('nodemailer');
+const authRoutes = require('./routes/authRoutes');
+const planRoutes = require('./routes/planRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 
 passport.use(new GoogleStrategy({
@@ -105,8 +109,16 @@ app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit: '50mb'}));
 app.use(morgan('dev'));
 app.use(cookieParser());
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'secret',
+  resave: false,
+  saveUninitialized: false
+}));
 app.use(express.json());
 app.use(passport.initialize());
+app.use('/api/auth', authRoutes);
+app.use('/api/plans', planRoutes);
+app.use('/api/admin', adminRoutes);
 
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,

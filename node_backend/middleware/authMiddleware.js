@@ -1,46 +1,24 @@
-const jwt=require("jsonwebtoken")
-exports.checkAuth = (req, res, next) => {
-    // console.log("REQUEST: ",req?.cookies)
-    const token = req?.cookies?.token;
-    // console.log("HAHAH123", req.cookies.token)
-    
-    if (!token) {
-      return res.status(401).json({ status: "fail", message: 'Unauthorized access. Token not provided.' });
-    }
-    try {
-      const decodedToken = jwt.verify(token, process.env.JWT_KEY);
-      // console.log("DECODED: ", decodedToken)
-      if (!decodedToken || !decodedToken.email) {
-        return res.status(401).json({ status: "fail", message: "Invalid token format" });
-      }
+const User = require('../models/userSchema');
 
-      const { email,name } = decodedToken;
-      req.user = {email,name};
-      
-      next();
-    } catch (error) {
-      console.log(error);
-      
-      // Xử lý cụ thể cho từng loại lỗi JWT
-      if (error.name === 'TokenExpiredError') {
-        return res.status(401).json({ 
-          status: "fail", 
-          message: 'Token has expired. Please login again.',
-          code: 'TOKEN_EXPIRED'
-        });
-      } else if (error.name === 'JsonWebTokenError') {
-        return res.status(401).json({ 
-          status: "fail", 
-          message: 'Invalid token.',
-          code: 'INVALID_TOKEN'
-        });
-      } else {
-        return res.status(401).json({ 
-          status: "fail", 
-          message: 'Unauthorized access.',
-          code: 'UNAUTHORIZED'
-        });
-      }
+exports.checkAuth = async (req, res, next) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ message: 'Not logged in' });
+  }
+  try {
+    const user = await User.findById(req.session.userId);
+    if (!user) return res.status(401).json({ message: 'User not found' });
+    req.user = user;
+    next();
+  } catch (err) {
+    res.status(401).json({ message: 'Auth failed' });
+  }
+};
+
+exports.authorize = (roles = []) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'Forbidden' });
     }
+    next();
   };
-  
+};

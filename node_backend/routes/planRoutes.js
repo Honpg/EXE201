@@ -1,8 +1,8 @@
 const router = require('express').Router();
 const Transaction = require('../models/Transaction');
-const { auth } = require('../middleware/auth');
+const { checkAuth } = require('../middleware/authMiddleware');
 
-router.post('/purchase', auth, async (req, res) => {
+router.post('/purchase', checkAuth, async (req, res) => {
   try {
     const { planName, price } = req.body;
     const transaction = await Transaction.create({
