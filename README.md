@@ -118,7 +118,7 @@ The AI-backend is responsible for handling AI-related tasks (e.g., generating re
 
 ## 2. node_backend (Node.js - Express)
 
-This is the Node.js backend that handles API requests and integrates with other services like the AI backend and the Chrome extension.
+This Node.js backend integrates with the AI service and Chrome extension, and now provides session-based authentication with user roles and plan purchase endpoints.
 
 ### Steps to set up the Node backend:
 
@@ -132,19 +132,19 @@ This is the Node.js backend that handles API requests and integrates with other 
      npm install
    
 
-3. *Set up environment variables*:
+ 3. *Set up environment variables*:
    - Inside the node_backend directory, you will find a file named .env.template.
-   - This file contains the structure and required environment variables for the project.
-   - *Create a new .env file* by copying the *.env.template*:
+- This file contains the structure and required environment variables for the project.
+- *Create a new .env file* by copying the *.env.template*:
        ```bash
        cp .env.template .env
-     
-   - Open the .env file and fill in the appropriate values for each environment variable.
+- Open the .env file and fill in the appropriate values for each environment variable. `MONGO_URI` and `SESSION_SECRET` are required.
 
    *Example of .env.template file*:
      ```bash
      PORT=3000
      MONGO_URI=your_mongodb_uri
+    SESSION_SECRET=your_session_secret
      GOOGLE_CLIENT_ID=your_google_client_id
      GOOGLE_CLIENT_SECRET=your_google_client_secret
      JWT_KEY=your_jwt_secret
@@ -158,7 +158,7 @@ This is the Node.js backend that handles API requests and integrates with other 
      ```bash
      npm run start
    
-  The backend server will now be running locally at http://localhost:3000 (or another port if configured).
+  The backend server will now be running locally at http://localhost:3000 by default (set the PORT variable to change it).
 
 
 ## 3. blabber-frontend (React - Vite)
