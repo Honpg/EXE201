@@ -3,13 +3,13 @@ const mongoose = require('mongoose');
 const screenshotSchema = new mongoose.Schema({
   filename: { type: String, required: true }, // Filename of the screenshot
   timestamp: { type: Date, default: Date.now }, // Timestamp when the screenshot was taken
-  takenBy: { type: String, required: true }, // User who took the screenshot (blabberEmail)
+  takenBy: { type: String, required: true }, // User who took the screenshot (oceanAiEmail)
 });
 
 const meetSchema = new mongoose.Schema({
   convenor: { type: String, required: true },
-  blabberEmail: { type: String, required: true },
-  blabberName: { type: String, required: true },
+  oceanAiEmail: { type: String, required: true },
+  oceanAiName: { type: String, required: true },
   meetingTitle: { type: String, required: true },
   meetingStartTimeStamp: { type: Date, required: true },
   meetingEndTimeStamp: { type: Date, required: true },

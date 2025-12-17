@@ -1,4 +1,4 @@
-# 🌊 Ocean AI  
+# 🌊 Ocean A
 AI-Powered Meeting Intelligence Platform  
 
 Ocean AI is an end-to-end AI-powered platform that automates meeting transcription, analysis, and report generation. It integrates a Chrome extension, web dashboard, and AI services to capture meetings in real time and transform them into structured, actionable insights.
@@ -63,6 +63,23 @@ Blabber solves these issues by automating transcription, report generation, and 
 - node_backend/ – Node.js Express backend.
 - .gitignore – Files to ignore in version control.
 - README.md – Setup guide and project documentation.
+
+## Git Configuration
+
+### .gitignore File
+
+The project includes a comprehensive `.gitignore` file that excludes:
+
+- **Python files**: `__pycache__/`, virtual environments (`env/`, `venv/`), build outputs
+- **Node.js files**: `node_modules/`, log files, build outputs (`dist/`)
+- **Environment files**: `.env` files containing sensitive information like API keys
+- **IDE/Editor files**: `.vscode/`, `.idea/`, editor temporary files
+- **Operating System files**: `.DS_Store`, `Thumbs.db`, system cache files
+- **Build outputs**: Compiled files, distribution folders, cache directories
+- **Chrome Extension**: Packaged extension files (`.crx`, `.pem`)
+
+This ensures that only source code and essential configuration files are tracked in version control, keeping the repository clean and secure.
+
 
 ## 1. AI-backend (Python - Flask)
 

@@ -147,16 +147,16 @@ const reportTypes = [
     };
 
     return (
-        <div className="border border-purple-300 bg-white shadow-lg rounded-xl p-6 m-4 hover:shadow-2xl shadow-purple-300 hover:shadow-purple-300 transition-shadow duration-300">
+        <div className="border border-gray-200 bg-white shadow-lg rounded-xl p-6 m-4 hover:shadow-2xl hover:shadow-orange-200 transition-shadow duration-300">
             <div className="flex flex-row w-full">
                 <div className="flex flex-col items-start w-full">
                     <div className='flex flex-col md:flex-row justify-between'>
                         <div >
-                            <h2 className="text-2xl font-bold text-blue-600 mb-2">{meet.meetingTitle}</h2>
+                            <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 bg-clip-text text-transparent mb-2">{meet.meetingTitle}</h2>
                             <p className="p-1 text-sm text-gray-500">Hosted by <span className="font-semibold">{meet.convenor}</span></p>
                         </div>
                         <div className="mb-2 flex flex-wrap md:w-1/2 md:self-end">
-                            <p className="text-sm p-1"><strong className="mb-1 text-purple-900">From:</strong> {formatTime(meet.meetingStartTimeStamp)}  </p><p className="text-sm p-1"> <strong className="text-blue-700">To:</strong> {formatTime(meet.meetingEndTimeStamp)}</p>
+                            <p className="text-sm p-1"><strong className="mb-1 text-orange-600">From:</strong> {formatTime(meet.meetingStartTimeStamp)}  </p><p className="text-sm p-1"> <strong className="text-purple-600">To:</strong> {formatTime(meet.meetingEndTimeStamp)}</p>
                         </div>
                     </div>
 
@@ -164,7 +164,7 @@ const reportTypes = [
 
                     <p className="w-full">
                         <p className="flex flex-wrap justify-between w-full">
-                            <p className="text-sm p-1"><strong className="mb-1 text-purple-900">Email:</strong> {meet.blabberEmail} </p><p className="text-sm p-1"> <strong className="text-blue-700">Duration:</strong> {calculateDuration(meet.meetingStartTimeStamp, meet.meetingEndTimeStamp)}</p>
+                            <p className="text-sm p-1"><strong className="mb-1 text-orange-600">Email:</strong> {meet.oceanAiEmail} </p><p className="text-sm p-1"> <strong className="text-purple-600">Duration:</strong> {calculateDuration(meet.meetingStartTimeStamp, meet.meetingEndTimeStamp)}</p>
                         </p>
                     </p>
 
@@ -178,7 +178,7 @@ const reportTypes = [
                     </p>
                 <button
                     onClick={openModal}
-                    className="mt-1 bg-purple-700 text-white px-4 py-2 self-end rounded hover:bg-purple-900"
+                    className="mt-1 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 text-white px-4 py-2 self-end rounded hover:from-orange-500 hover:via-pink-600 hover:to-purple-700 transition-all duration-300"
                 >
                     Generate Report
                 </button>
@@ -303,7 +303,7 @@ const reportTypes = [
             </button>
             <button
                 type="submit"
-                className={`px-4 py-2 bg-purple-700 text-white rounded ${loading ? 'opacity-50' : 'hover:bg-purple-900'}`}
+                className={`px-4 py-2 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 text-white rounded transition-all duration-300 ${loading ? 'opacity-50' : 'hover:from-orange-500 hover:via-pink-600 hover:to-purple-700'}`}
                 disabled={loading}
             >
                 {loading ? 'Generating...' : 'Generate Report'}

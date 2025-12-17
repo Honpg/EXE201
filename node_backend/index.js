@@ -1,5 +1,10 @@
 // Import necessary packages
 require('dotenv').config(); // Load environment variables
+console.log("======== ENV TEST ========");
+console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
+console.log("======== END TEST ========");
+// console.log("AI_SERVER_URL:", process.env.AI_SERVER_URL);
 const express = require('express');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
@@ -37,6 +42,10 @@ async function(request, accessToken, refreshToken, profile, done) {
 } 
 ));
 
+console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID);
+console.log('GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET);
+console.log('All environment variables:', Object.keys(process.env));
+console.log('dotenv loaded:', require('dotenv').config({ debug: true }));
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -111,11 +120,16 @@ mongoose.connect(MONGO_URI, {
        console.log('Received /api/meet with body:', req.body);
       const meetData = req.body;
   
-      // Check if the user exists based on blabberEmail
-      const email = meetData?.blabberEmail;
+      // Check if the user exists based on oceanAiEmail (or legacy field for backward compatibility)
+      const email = meetData?.oceanAiEmail;
+      console.log('Extracted email for user lookup:', email);
+      
+      // All fields should be using oceanAiEmail and oceanAiName consistently now
+      
       const user = await User.findOne({ email });
   
       if (!user) {
+        console.log('User not found with email:', email);
         throw new Error("This email isn't registered!");
       }
   
@@ -125,7 +139,7 @@ mongoose.connect(MONGO_URI, {
         .map(screenshot => ({
           filename: screenshot.filename,
           timestamp: screenshot.timestamp || new Date(), // Use provided timestamp or set to now
-          takenBy: screenshot.takenBy || email // Use blabberEmail if not provided
+          takenBy: screenshot.takenBy || email // Use oceanAiEmail if not provided
         })) || [];
   
       // Create new Meet instance
@@ -234,7 +248,7 @@ app.get('/api/meet',checkAuth, async (req, res) => {
         throw new Error("This email isn't registered!")
     }
     // console.log(user, email)
-    const meets = await Meet.find({ blabberEmail : email}).sort({ meetingStartTimeStamp: -1 });
+    const meets = await Meet.find({ oceanAiEmail: email}).sort({ meetingStartTimeStamp: -1 });
     if (meets.length === 0) {
       return res.status(404).json({ message: 'No meets found for this email.' });
     }
@@ -300,36 +314,30 @@ app.get("/api/oauth/logout", (req, res) => {
 });
 
 app.post('/api/register-from-extension', async (req, res) => {
-   console.log("Register request body:", req.body);  // <
-  const { email, name } = req.body;
-
-  if (!email || !name) {
-      return res.status(400).json({ message: 'Email and name are required.' });
-  }
-
   try {
-      // Check if the user already exists
-      const existingUser = await User.findOne({ email });
-      
-      if (existingUser) {
-          return res.status(409).json({ message: 'User already exists.' });
-      }
+    const { email, name } = req.body;
 
-      // Create a new user
-      const newUser = new User({ email, name });
-      await newUser.save();
+    if (!email || !name) {
+      return res.status(400).json({ message: 'Missing email or name' });
+    }
 
-      return res.status(201).json({ message: 'User created successfully.', user: newUser });
+    // Kiểm tra xem người dùng đã tồn tại chưa
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({ email, name });
+    }
+
+    res.status(200).json({ message: 'User registered successfully', user });
   } catch (error) {
-      console.error('Error registering user:', error);
-      return res.status(500).json({ message: 'Internal server error.' });
+    console.error('Error registering user:', error);
+    res.status(500).json({ message: 'Error registering user', error });
   }
 });
 
 app.post('/api/upload-screenshot', (req, res) => {
   const { filename, imageData, email } = req.body;
 
-  // Directory path based on blabberEmail
+  // Directory path based on oceanAiEmail
   const directoryPath = path.join(__dirname, 'screenshots', email);
 
   // Create directory if it doesn't exist

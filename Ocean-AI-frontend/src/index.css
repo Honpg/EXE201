@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@font-face {
+    font-family: 'lilitaone';
+    font-style: normal;
+    font-weight: 200;
+    src: url(./fonts/Lilita_One/LilitaOne-Regular.ttf);
+}
+
+@font-face {
+  font-family: 'titilliumweb';
+  font-style: normal;
+  font-weight: 600;
+  src: url(./fonts/TitilliumWeb/TitilliumWeb-Regular.ttf);
+}
+
+@font-face {
+  font-family: 'notoserif';
+  font-style: normal;
+  font-weight: 400;
+  src: url(./fonts/Noto_Serif_Old_Uyghur/NotoSerifOldUyghur-Regular.ttf);
+}
+
+
+@layer base {
+  html {
+    font-family: 'notoserif', serif;
+    min-height: 100vh;
+  }
+}
+
+.superlarge {
+  font-size: 10rem;
+  letter-spacing: -10px;
+}
+
+@media screen and (max-width: 768px) {
+  .superlarge {
+    font-size: 7rem;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .superlarge {
+    font-size: 5rem;
+  }
+}
+
+.logo-bg {
+  background: -webkit-linear-gradient(45deg, #fb923c, #ec4899, #9333ea);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nav-name:hover {
+  background: white !important;
+  background-clip: padding-box !important;
+  -webkit-background-clip: padding-box !important;
+}
+
+.nav-name:hover span {
+  background: -webkit-linear-gradient(45deg, #fb923c, #ec4899, #9333ea) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.dashboard-box {
+  border: 2px solid transparent;
+  background: transparent;
+  transition: all 0.3s ease;
+  padding: 16px;
+}
+
+.dashboard-box:hover {
+  background: white !important;
+  border: 2px solid white !important;
+  border-radius: 8px;
+}
+
+.dashboard-box:hover .dashboard-text {
+  background: -webkit-linear-gradient(45deg, #fb923c, #ec4899, #9333ea) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.dashboard-text {
+  background: -webkit-linear-gradient(45deg, #fb923c, #ec4899, #9333ea);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+}
