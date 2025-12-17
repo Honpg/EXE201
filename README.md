@@ -1,29 +1,42 @@
-# Ocean AI - AI-Powered Meeting Summaries & Reports  demo
+# 🌊 Ocean A
+AI-Powered Meeting Intelligence Platform  
 
-> Built at ScrollHacks 2024
-
-Blabber is an AI-powered Chrome extension designed to streamline meeting management and documentation. It simplifies the process of capturing, organizing, and sharing meeting data with key stakeholders. Blabber ensures that no critical information is missed during meetings, offering seamless solutions for transcription, report generation, and sharing.
-
----
- 
-## Key Features
-
-- **Real-Time Transcription**: Blabber uses advanced speech-to-text APIs for accurate, real-time transcription, capturing every aspect of your meetings.
-- **Comprehensive Report Generation**: Create customizable reports in PDF and DOCX formats with options such as:
-  - 📊 **Speaker-Based Reports**: Focus on individual speakers and their contributions.
-  - ⏱ **Interval-Based Reports**: Review discussions broken down by time intervals.
-  - 💬 **Sentiment-Based Reports**: Get insights into the emotional tone of the meeting.
-  - 🗒 **General Reports**: A holistic overview of all meeting details.
-- **Email Integration**: Automatically email generated reports to all attendees, ensuring everyone stays informed.
-- **Screenshot Capture**: Capture important moments in meetings using a simple keyboard shortcut. Screenshots are linked to transcripts and can be annotated for better clarity.
-- **Sentiment Analysis**: Using Natural Language Processing (NLP), Blabber provides insights into the emotional tone of the conversation, helping teams understand the mood of discussions.
-
-  <div style="display: flex; align-items: center;">
-    <img src="https://github.com/user-attachments/assets/ee0abb74-9fb7-4855-8030-06d2ba2dcdae" alt="Blabber Icon" width="250" />
-  </div>
-
+Ocean AI is an end-to-end AI-powered platform that automates meeting transcription, analysis, and report generation. It integrates a Chrome extension, web dashboard, and AI services to capture meetings in real time and transform them into structured, actionable insights.
 
 ---
+
+## 🚀 Features
+
+- **Real-Time Transcription**  
+  Accurate speech-to-text transcription during live meetings.
+
+- **AI-Powered Meeting Analysis**
+  - Speaker-based segmentation  
+  - Time-interval breakdown  
+  - Sentiment analysis using NLP  
+  - General meeting summaries
+
+- **Automated Report Generation**
+  - Export reports in **PDF** and **DOCX**
+  - Customizable formats for different stakeholders
+
+- **Email Integration**
+  - Automatically sends generated reports to meeting participants
+
+- **AI Chat Bot**
+  - use API Gemini key to auto answer user
+
+---
+
+## System Architecture
+
+Ocean AI follows a modular, multi-service architecture:
+
+- **Chrome Extension**: Captures meeting audio, screenshots, and metadata  
+- **AI Backend (Python – Flask)**: Transcription processing, NLP, sentiment analysis, report generation  
+- **Node Backend (Express)**: API management, authentication, database, email services  
+- **Frontend (React + Vite)**: Dashboard for managing meetings and reports  
+
 
 ## What is the core concept or problem this project aims to solve?
 
@@ -39,24 +52,16 @@ Meetings often result in miscommunication, missed details, and inefficient post-
 
 Blabber solves these issues by automating transcription, report generation, and providing tools like sentiment analysis and screenshot capture to ensure that no critical information is missed and that meetings are documented efficiently and accurately.
 
----
 
-## Demo Video
-
-Check out the demo video to see Blabber in action: [Watch Demo Video](https://www.youtube.com/watch?v=S3DEO8QrMMM)
-
----
-
-# Blabber Chrome Extension - Local Setup Guide
+# Ocean AI Chrome Extension - Local Setup Guide
 
 ## Project Directory Structure
 
 - AI-backend/ – Python Flask-based backend for AI-related tasks.
-- blabber-frontend/ – React-based frontend for Blabber.
+- Ocean AI-frontend/ – React-based frontend for Blabber.
 - google-meet-chrome-extension/ – Chrome extension for Google Meet integration.
 - node_backend/ – Node.js Express backend.
 - .gitignore – Files to ignore in version control.
-- blabber architecture.png – Architecture diagram for Blabber.
 - README.md – Setup guide and project documentation.
 
 ## Git Configuration
@@ -161,7 +166,7 @@ This is the Node.js backend that handles API requests and integrates with other 
   The backend server will now be running locally at http://localhost:3000 (or another port if configured).
 
 
-## 3. blabber-frontend (React - Vite)
+## 3. Ocean AI-frontend (React - Vite)
 
 This is the frontend for the Blabber application, built using React and Vite for fast development.
 
@@ -169,7 +174,7 @@ This is the frontend for the Blabber application, built using React and Vite for
 
 1. *Navigate to the blabber-frontend directory*:
      ```bash
-     cd blabber-frontend
+     cd Ocean AI-frontend
    
 
 2. *Install dependencies*:
@@ -186,7 +191,7 @@ This is the frontend for the Blabber application, built using React and Vite for
 
 ## 4. google-meet-chrome-extension
 
-This directory contains the Chrome extension that integrates Blabber with Google Meet.
+This directory contains the Chrome extension that integrates Ocean AI with Google Meet.
 
 ### Steps to load the extension in Chrome:
 
@@ -214,40 +219,3 @@ This directory contains the Chrome extension that integrates Blabber with Google
 
 - Google OAuth Configuration:
    - Ensure you have Google OAuth credentials set up (GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in the .env file of the Node backend).
-
----
-
-# Screenshots
-
-![Homepage](https://i.imgur.com/oUBrtxz.jpeg)
-![Features](https://i.imgur.com/tbkvwBS.jpeg)
-![Dashboard](https://github.com/user-attachments/assets/94362d82-d713-4ccf-87a5-d5b68f1f541a)
-![Features](https://i.imgur.com/IthUbx6.jpeg)
-![Features](https://i.imgur.com/SUL2nI7.jpeg)
-![Google meet example](https://i.imgur.com/WNS2JpM.jpeg)
-![Extension UI to capture screenshots or view previous meet transcripts](https://i.imgur.com/OKO6jAc.jpeg)
-![Website UI to generate reports for previous meets](https://i.imgur.com/riwQzD5.jpeg)
-![Getting report on email - example](https://i.imgur.com/YWF9LQv.jpeg)
-
----
-
-## License
-This project's Google Chrome extension uses code from [Transcriptonic](https://github.com/vivek-nexus/transcriptonic) under the MIT License.
-
-## Overview of the Team
-
-### 1. Syed Hisham Akmal – Team Leader & Web Developer Extraordinaire
-
-- Hisham leads the team with a strong background in web development and a proven track record, having won three national-level hackathons. He combines technical skills with leadership to guide the team in creating robust and scalable software solutions.
-
-### 2. Prateek Rajput – AI & Backend Architect
-
-- Prateek specializes in AI and backend development, with experience in multiple AI projects. His focus is on building AI-driven solutions that improve efficiency and solve real-world problems, bringing valuable technical depth to the team.
-
-### 3. K Ramachandra Shenoy – Generative AI & Machine Learning Prodigy
-
-- Ramachandra brings expertise in Generative AI and Machine Learning, helping the team push forward with innovative AI technologies. His work focuses on applying these technologies to practical, impactful solutions.
-
-### 4. Sayed Afnan Khazi – Web Developer & Social Impact Innovator
-
-- Afnan is a web developer and two-time national hackathon winner. His passion for technology and social impact drives his work, where he strives to build platforms that create positive change while ensuring a high-quality user experience.
