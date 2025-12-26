@@ -1,4 +1,4 @@
-# 🌊 Ocean A
+# 🌊 Ocean AI
 AI-Powered Meeting Intelligence Platform  
 
 Ocean AI is an end-to-end AI-powered platform that automates meeting transcription, analysis, and report generation. It integrates a Chrome extension, web dashboard, and AI services to capture meetings in real time and transform them into structured, actionable insights.
